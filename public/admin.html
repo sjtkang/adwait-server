@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wait &amp; Earn — Admin</title>
+    <style>
+      body { max-width: 820px; margin: 24px auto; padding: 0 16px; font-family: system-ui, -apple-system, sans-serif; color: #1a1a1a; }
+      h1 { font-size: 20px; }
+      h2 { font-size: 15px; margin-top: 24px; }
+      section { border: 1px solid #e2e2e2; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+      label { display: block; margin: 10px 0; font-size: 13px; }
+      input, select, textarea { width: 100%; box-sizing: border-box; padding: 7px 9px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; font-family: inherit; }
+      textarea { resize: vertical; min-height: 56px; }
+      button { background: #161616; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
+      button.secondary { background: #eee; color: #161616; }
+      button.danger { background: #c0392b; }
+      small { color: #666; }
+      .msg { font-size: 13px; min-height: 18px; margin-top: 8px; }
+      .msg.err { color: #c0392b; }
+      .msg.ok { color: #2e7d32; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+      th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+      th { color: #666; font-weight: 600; }
+      img.thumb { height: 28px; border-radius: 4px; vertical-align: middle; }
+      td.actions button { margin-right: 4px; padding: 5px 9px; }
+      td.actions input { width: 60px; display: inline-block; margin: 0 2px; }
+    </style>
+  </head>
+  <body>
+    <h1>Wait &amp; Earn — Campaign Admin</h1>
+
+    <section>
+      <label>Admin token <input id="token" type="password" placeholder="x-admin-token" /></label>
+      <small>Sent with every admin request. Set <code>ADMIN_TOKEN</code> on the server (dev default: <code>changeme-dev-token</code>). Dev gate only — replace with real auth before deploying.</small>
+    </section>
+
+    <section>
+      <h2 id="formTitle">New campaign</h2>
+      <form id="form">
+        <label>Format
+          <select id="format" name="format">
+            <option value="image">Image</option>
+            <option value="text">Text</option>
+            <option value="video">Video</option>
+          </select>
+        </label>
+        <label>Headline <input name="headline" maxlength="200" required /></label>
+        <label>Body <textarea name="body" maxlength="500"></textarea></label>
+        <label>Click URL <input name="clickUrl" type="url" placeholder="https://advertiser.com/landing" required /></label>
+        <label id="budgetRow">Impressions purchased <input name="impressionsPurchased" type="number" min="1" value="1000" required /></label>
+        <label>CPM — USD per 1,000 viewable impressions <input name="cpm" type="number" min="0" step="0.01" value="2.00" required /></label>
+        <label id="imageRow"><span id="imageHint">Image file (PNG/JPG/WebP/GIF, max 2 MB)</span> <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /></label>
+        <button type="submit" id="submitBtn">Create campaign</button>
+        <button type="button" id="cancelBtn" class="secondary" style="display:none">Cancel edit</button>
+        <p id="msg" class="msg"></p>
+      </form>
+    </section>
+
+    <section>
+      <h2>Campaigns <button id="refresh" class="secondary" type="button">Refresh</button></h2>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Format</th><th>Headline</th><th>CPM</th><th>Served / Bought</th><th>Reach</th><th>Img</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+
+    <script>
+      const tokenInput = document.getElementById('token');
+      tokenInput.value = localStorage.getItem('adminToken') || '';
+      tokenInput.addEventListener('change', () => localStorage.setItem('adminToken', tokenInput.value));
+      const authHeaders = () => ({ 'x-admin-token': tokenInput.value });
+
+      const form = document.getElementById('form');
+      const formatSel = document.getElementById('format');
+      const budgetRow = document.getElementById('budgetRow');
+      const budgetInput = form.impressionsPurchased;
+      const imageRow = document.getElementById('imageRow');
+      const imageHint = document.getElementById('imageHint');
+      const formTitle = document.getElementById('formTitle');
+      const submitBtn = document.getElementById('submitBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const msg = document.getElementById('msg');
+      const rows = document.getElementById('rows');
+
+      let editingId = null;
+      let currentCampaigns = [];
+
+      const syncImageRow = () => { imageRow.style.display = formatSel.value === 'image' ? '' : 'none'; };
+
+      function enterCreateMode() {
+        editingId = null;
+        form.reset();
+        formatSel.disabled = false;
+        budgetInput.disabled = false;
+        budgetRow.style.display = '';
+        imageHint.textContent = 'Image file (PNG/JPG/WebP/GIF, max 2 MB)';
+        formTitle.textContent = 'New campaign';
+        submitBtn.textContent = 'Create campaign';
+        cancelBtn.style.display = 'none';
+        msg.className = 'msg'; msg.textContent = '';
+        syncImageRow();
+      }
+
+      function enterEditMode(c) {
+        editingId = c.id;
+        formatSel.value = c.format;
+        formatSel.disabled = true;          // format is immutable on edit
+        form.headline.value = c.headline;
+        form.body.value = c.body || '';
+        form.clickUrl.value = c.clickUrl;
+        form.cpm.value = Number(c.cpm);
+        budgetInput.disabled = true;        // budget changes via top-up, not edit
+        budgetRow.style.display = 'none';
+        imageHint.textContent = 'Replace image (optional — leave empty to keep current)';
+        formTitle.textContent = 'Editing ' + c.id;
+        submitBtn.textContent = 'Save changes';
+        cancelBtn.style.display = '';
+        msg.className = 'msg'; msg.textContent = '';
+        syncImageRow();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      formatSel.addEventListener('change', syncImageRow);
+      cancelBtn.addEventListener('click', enterCreateMode);
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.className = 'msg'; msg.textContent = editingId ? 'Saving…' : 'Creating…';
+        const fd = new FormData(form);                 // disabled fields are auto-excluded
+        if (formatSel.value !== 'image') fd.delete('image');
+        const url = editingId ? '/api/admin/campaigns/' + encodeURIComponent(editingId) : '/api/admin/campaigns';
+        const method = editingId ? 'PATCH' : 'POST';
+        try {
+          const res = await fetch(url, { method, headers: authHeaders(), body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) { msg.className = 'msg err'; msg.textContent = 'Error: ' + (data.error || res.status); return; }
+          enterCreateMode();
+          msg.className = 'msg ok'; msg.textContent = 'Saved.';
+          loadList();
+        } catch {
+          msg.className = 'msg err'; msg.textContent = 'Network error — is the server running?';
+        }
+      });
+
+      async function doAction(method, url, jsonBody) {
+        try {
+          const opts = { method, headers: { ...authHeaders() } };
+          if (jsonBody) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(jsonBody); }
+          const res = await fetch(url, opts);
+          if (!res.ok) { const d = await res.json().catch(() => ({})); alert('Error: ' + (d.error || res.status)); return; }
+          loadList();
+        } catch { alert('Network error — is the server running?'); }
+      }
+
+      rows.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const action = btn.getAttribute('data-action');
+        if (action === 'edit') {
+          const c = currentCampaigns.find((x) => x.id === id);
+          if (c) enterEditMode(c);
+        } else if (action === 'delete') {
+          if (confirm('Delete ' + id + '? This removes the campaign and its recorded impressions.')) {
+            doAction('DELETE', '/api/admin/campaigns/' + encodeURIComponent(id));
+          }
+        } else if (action === 'topup') {
+          const input = rows.querySelector('input[data-topup-input="' + id + '"]');
+          const amount = Number(input && input.value);
+          if (!Number.isFinite(amount) || amount < 1) { alert('Enter a top-up amount of at least 1.'); return; }
+          doAction('POST', '/api/admin/campaigns/' + encodeURIComponent(id) + '/topup', { amount });
+        }
+      });
+
+      const escapeHtml = (s) => { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; };
+
+      async function loadList() {
+        try {
+          const res = await fetch('/api/admin/campaigns', { headers: authHeaders() });
+          if (!res.ok) {
+            rows.innerHTML = '<tr><td colspan="8">' + (res.status === 401 ? 'Enter a valid admin token to view campaigns.' : 'Error ' + res.status) + '</td></tr>';
+            return;
+          }
+          currentCampaigns = await res.json();
+          rows.innerHTML = '';
+          for (const c of currentCampaigns) {
+            const tr = document.createElement('tr');
+            const thumb = c.imageUrl ? '<img class="thumb" src="' + c.imageUrl + '" alt="" />' : '—';
+            tr.innerHTML =
+              '<td>' + escapeHtml(c.id) + '</td>' +
+              '<td>' + escapeHtml(c.format) + '</td>' +
+              '<td>' + escapeHtml(c.headline) + '</td>' +
+              '<td>$' + Number(c.cpm).toFixed(2) + '</td>' +
+              '<td>' + c.impressionsServed + ' / ' + c.impressionsPurchased + '</td>' +
+              '<td>' + c.reach + '</td>' +
+              '<td>' + thumb + '</td>' +
+              '<td class="actions">' +
+                '<button data-action="edit" data-id="' + escapeHtml(c.id) + '">Edit</button>' +
+                '<input type="number" min="1" value="1000" data-topup-input="' + escapeHtml(c.id) + '" />' +
+                '<button data-action="topup" data-id="' + escapeHtml(c.id) + '">+ Budget</button>' +
+                '<button class="danger" data-action="delete" data-id="' + escapeHtml(c.id) + '">Delete</button>' +
+              '</td>';
+            rows.appendChild(tr);
+          }
+          if (currentCampaigns.length === 0) rows.innerHTML = '<tr><td colspan="8">No campaigns yet.</td></tr>';
+        } catch {
+          rows.innerHTML = '<tr><td colspan="8">Network error — is the server running?</td></tr>';
+        }
+      }
+
+      document.getElementById('refresh').addEventListener('click', loadList);
+      enterCreateMode();
+      loadList();
+    </script>
+  </body>
+</html>
