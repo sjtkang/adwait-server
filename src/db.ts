@@ -60,7 +60,7 @@ export async function recordImpression(imp: NewImpression): Promise<void> {
   const client = await pool.connect(); // a transaction needs one dedicated connection
   try {
     await client.query('BEGIN');
-    await client.query(`INSERT INTO impressions (ad_id, site, viewable_ms, install_id) VALUES ($1,$2,$3,$4)`, [imp.adId, imp.site, imp.viewableMs, imp.installId]);
+    await client.query(`INSERT INTO impressions (ad_id, site, viewable_ms, install_id) VALUES ($1,$2,$3,$4)`, [imp.adId, imp.site, Math.round(imp.viewableMs), imp.installId]);
     if (imp.viewableMs >= VIEWABLE_THRESHOLD_MS) {
       await client.query(`UPDATE campaigns SET impressions_served = impressions_served + 1 WHERE id = $1`, [imp.adId]);
     }
