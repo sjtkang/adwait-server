@@ -50,7 +50,7 @@
         <label>Click URL <input name="clickUrl" type="url" placeholder="https://advertiser.com/landing" required /></label>
         <label id="budgetRow">Impressions purchased <input name="impressionsPurchased" type="number" min="1" value="1000" required /></label>
         <label>CPM — USD per 1,000 viewable impressions <input name="cpm" type="number" min="0" step="0.01" value="2.00" required /></label>
-        <label id="imageRow"><span id="imageHint">Image file (PNG/JPG/WebP/GIF, max 2 MB)</span> <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /></label>
+        <label id="imageRow"><span id="imageHint">Image or video file (PNG/JPG/WebP/GIF/MP4/WebM, max 25 MB)</span> <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" /></label>
         <button type="submit" id="submitBtn">Create campaign</button>
         <button type="button" id="cancelBtn" class="secondary" style="display:none">Cancel edit</button>
         <p id="msg" class="msg"></p>
@@ -61,7 +61,7 @@
       <h2>Campaigns <button id="refresh" class="secondary" type="button">Refresh</button></h2>
       <table>
         <thead>
-          <tr><th>ID</th><th>Format</th><th>Headline</th><th>CPM</th><th>Served / Bought</th><th>Reach</th><th>Img</th><th>Actions</th></tr>
+          <tr><th>ID</th><th>Format</th><th>Headline</th><th>CPM</th><th>Served / Bought</th><th>Reach</th><th>Media</th><th>Actions</th></tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
@@ -88,7 +88,8 @@
       let editingId = null;
       let currentCampaigns = [];
 
-      const syncImageRow = () => { imageRow.style.display = formatSel.value === 'image' ? '' : 'none'; };
+      // The file picker is shown for image AND video formats; text needs no file.
+      const syncImageRow = () => { imageRow.style.display = (formatSel.value === 'image' || formatSel.value === 'video') ? '' : 'none'; };
 
       function enterCreateMode() {
         editingId = null;
@@ -96,7 +97,7 @@
         formatSel.disabled = false;
         budgetInput.disabled = false;
         budgetRow.style.display = '';
-        imageHint.textContent = 'Image file (PNG/JPG/WebP/GIF, max 2 MB)';
+        imageHint.textContent = 'Image or video file (PNG/JPG/WebP/GIF/MP4/WebM, max 25 MB)';
         formTitle.textContent = 'New campaign';
         submitBtn.textContent = 'Create campaign';
         cancelBtn.style.display = 'none';
@@ -114,7 +115,7 @@
         form.cpm.value = Number(c.cpm);
         budgetInput.disabled = true;        // budget changes via top-up, not edit
         budgetRow.style.display = 'none';
-        imageHint.textContent = 'Replace image (optional — leave empty to keep current)';
+        imageHint.textContent = 'Replace media (optional — leave empty to keep current)';
         formTitle.textContent = 'Editing ' + c.id;
         submitBtn.textContent = 'Save changes';
         cancelBtn.style.display = '';
@@ -130,7 +131,7 @@
         e.preventDefault();
         msg.className = 'msg'; msg.textContent = editingId ? 'Saving…' : 'Creating…';
         const fd = new FormData(form);                 // disabled fields are auto-excluded
-        if (formatSel.value !== 'image') fd.delete('image');
+        if (formatSel.value === 'text') fd.delete('image');   // only text has no file
         const url = editingId ? '/api/admin/campaigns/' + encodeURIComponent(editingId) : '/api/admin/campaigns';
         const method = editingId ? 'PATCH' : 'POST';
         try {
@@ -188,7 +189,9 @@
           rows.innerHTML = '';
           for (const c of currentCampaigns) {
             const tr = document.createElement('tr');
-            const thumb = c.imageUrl ? '<img class="thumb" src="' + c.imageUrl + '" alt="" />' : '—';
+            // Show a thumbnail for images; for video just show a tag (thumbnailing video needs extra work).
+            let media = '—';
+            if (c.imageUrl) media = c.format === 'video' ? '🎞 video' : '<img class="thumb" src="' + c.imageUrl + '" alt="" />';
             tr.innerHTML =
               '<td>' + escapeHtml(c.id) + '</td>' +
               '<td>' + escapeHtml(c.format) + '</td>' +
@@ -196,7 +199,7 @@
               '<td>$' + Number(c.cpm).toFixed(2) + '</td>' +
               '<td>' + c.impressionsServed + ' / ' + c.impressionsPurchased + '</td>' +
               '<td>' + c.reach + '</td>' +
-              '<td>' + thumb + '</td>' +
+              '<td>' + media + '</td>' +
               '<td class="actions">' +
                 '<button data-action="edit" data-id="' + escapeHtml(c.id) + '">Edit</button>' +
                 '<input type="number" min="1" value="1000" data-topup-input="' + escapeHtml(c.id) + '" />' +

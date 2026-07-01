@@ -2,30 +2,25 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import path from 'node:path';
-import { mkdirSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign } from './db';
 import { type AdFormat } from './ads';
+import { uploadAdFile, isAllowedAdMime, storageConfigured } from './storage';
 
 const PORT = Number(process.env.PORT) || 3000;
-const PUBLIC_URL = process.env.PUBLIC_URL ?? `http://localhost:${PORT}`;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? 'changeme-dev-token';
-
-mkdirSync('uploads', { recursive: true });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
 
-const storage = multer.diskStorage({
-  destination: 'uploads',
-  filename: (_req, file, cb) => { cb(null, `${Date.now()}_${randomUUID().slice(0, 8)}${path.extname(file.originalname).toLowerCase()}`); },
-});
+// Files are held in MEMORY just long enough to forward them to object storage,
+// then the buffer is discarded. Nothing touches the server's own disk — which
+// is exactly what makes uploads survive Render restarts and redeploys.
 const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => { cb(null, ['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.mimetype)); },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB — room for a short video clip
+  fileFilter: (_req, file, cb) => { cb(null, isAllowedAdMime(file.mimetype)); },
 });
 
 // Wraps an async handler so a rejected promise reaches the error middleware
@@ -75,8 +70,9 @@ app.post('/api/admin/campaigns', requireAdmin, upload.single('image'), ah(async 
   const formatOk = format === 'image' || format === 'text' || format === 'video';
   const valid = formatOk && typeof headline === 'string' && headline.length > 0 && headline.length <= 200 && typeof body === 'string' && body.length <= 500 && typeof clickUrl === 'string' && /^https?:\/\//i.test(clickUrl) && clickUrl.length <= 500 && Number.isFinite(impressionsPurchased) && impressionsPurchased >= 1 && Number.isFinite(cpm) && cpm >= 0;
   if (!valid) { res.status(400).json({ error: 'invalid campaign fields' }); return; }
-  if (format === 'image' && !req.file) { res.status(400).json({ error: 'image ads require an image file' }); return; }
-  const imageUrl = req.file ? `${PUBLIC_URL}/uploads/${req.file.filename}` : undefined;
+  // Image AND video ads need a file; text ads don't.
+  if ((format === 'image' || format === 'video') && !req.file) { res.status(400).json({ error: 'image and video ads require a file' }); return; }
+  const imageUrl = req.file ? await uploadAdFile(req.file.buffer, req.file.mimetype) : undefined;
   const id = `camp_${randomUUID().slice(0, 8)}`;
   await createCampaign({ id, format, headline, body, imageUrl, clickUrl, impressionsPurchased: Math.floor(impressionsPurchased), cpm });
   res.json({ ok: true, id });
@@ -87,7 +83,8 @@ app.patch('/api/admin/campaigns/:id', requireAdmin, upload.single('image'), ah(a
   const cpm = Number(req.body?.cpm);
   const valid = typeof headline === 'string' && headline.length > 0 && headline.length <= 200 && typeof body === 'string' && body.length <= 500 && typeof clickUrl === 'string' && /^https?:\/\//i.test(clickUrl) && clickUrl.length <= 500 && Number.isFinite(cpm) && cpm >= 0;
   if (!valid) { res.status(400).json({ error: 'invalid campaign fields' }); return; }
-  const imageUrl = req.file ? `${PUBLIC_URL}/uploads/${req.file.filename}` : undefined;
+  // New file is optional on edit; when present it replaces the stored URL.
+  const imageUrl = req.file ? await uploadAdFile(req.file.buffer, req.file.mimetype) : undefined;
   const ok = await updateCampaign(req.params.id, { headline, body, clickUrl, cpm, imageUrl });
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
   res.json({ ok: true });
@@ -113,7 +110,6 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: 'server error' });
 });
 
-// Create tables/seed BEFORE accepting traffic; bail loudly if the DB is unreachable.
 init()
-  .then(() => { app.listen(PORT, () => console.log(`Wait & Earn backend on ${PUBLIC_URL}`)); })
+  .then(() => { app.listen(PORT, () => console.log(`Wait & Earn backend on port ${PORT} — object storage ${storageConfigured() ? 'configured' : 'NOT configured (uploads will fail until S3_* env vars are set)'}`)); })
   .catch((e) => { console.error('Database init failed:', e); process.exit(1); });
