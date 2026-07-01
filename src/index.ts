@@ -19,7 +19,7 @@ app.use(express.json());
 // is exactly what makes uploads survive Render restarts and redeploys.
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB — room for a short video clip
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB — plenty for a banner image
   fileFilter: (_req, file, cb) => { cb(null, isAllowedAdMime(file.mimetype)); },
 });
 
@@ -52,7 +52,7 @@ app.get('/api/earnings', ah(async (req, res) => {
   res.json(await getEarnings(installId));
 }));
 
-app.get('/api/stats', ah(async (_req, res) => { res.json(await getStats()); }));
+app.get('/api/stats', requireAdmin, ah(async (_req, res) => { res.json(await getStats()); }));
 
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
   if (req.header('x-admin-token') !== ADMIN_TOKEN) { res.status(401).json({ error: 'unauthorized' }); return; }
@@ -67,11 +67,11 @@ app.post('/api/admin/campaigns', requireAdmin, upload.single('image'), ah(async 
   const { format, headline, body, clickUrl } = req.body ?? {};
   const impressionsPurchased = Number(req.body?.impressionsPurchased);
   const cpm = Number(req.body?.cpm);
-  const formatOk = format === 'image' || format === 'text' || format === 'video';
+  const formatOk = format === 'image' || format === 'text';
   const valid = formatOk && typeof headline === 'string' && headline.length > 0 && headline.length <= 200 && typeof body === 'string' && body.length <= 500 && typeof clickUrl === 'string' && /^https?:\/\//i.test(clickUrl) && clickUrl.length <= 500 && Number.isFinite(impressionsPurchased) && impressionsPurchased >= 1 && Number.isFinite(cpm) && cpm >= 0;
   if (!valid) { res.status(400).json({ error: 'invalid campaign fields' }); return; }
-  // Image AND video ads need a file; text ads don't.
-  if ((format === 'image' || format === 'video') && !req.file) { res.status(400).json({ error: 'image and video ads require a file' }); return; }
+  // Image ads need a file; text ads don't.
+  if (format === 'image' && !req.file) { res.status(400).json({ error: 'image ads require an image file' }); return; }
   const imageUrl = req.file ? await uploadAdFile(req.file.buffer, req.file.mimetype) : undefined;
   const id = `camp_${randomUUID().slice(0, 8)}`;
   await createCampaign({ id, format, headline, body, imageUrl, clickUrl, impressionsPurchased: Math.floor(impressionsPurchased), cpm });

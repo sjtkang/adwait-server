@@ -1,4 +1,4 @@
-export type AdFormat = 'image' | 'text' | 'video';
+export type AdFormat = 'image' | 'text';
 
 export interface Ad {
   id: string;
@@ -7,13 +7,16 @@ export interface Ad {
   body: string;
   imageUrl?: string;
   clickUrl: string;
+  // The user's earnings for one viewable view of this ad (cpm/1000 * revenue
+  // share). Only set on the serving path (pickEligibleAd); drives the live
+  // counter in the overlay. The popup remains the source-of-truth ledger.
+  valuePerView?: number;
 }
 
 export interface Campaign extends Ad {
   impressionsPurchased: number;
-  // What the advertiser pays per 1,000 viewable impressions (USD), negotiated
-  // per campaign. House ads use a PLACEHOLDER so the earnings UI has something
-  // to show in dev — real campaigns carry their real negotiated rate.
+  // What the advertiser pays per 1,000 viewable impressions (USD). House ads
+  // use a PLACEHOLDER rate so the earnings UI has something to show in dev.
   cpm: number;
 }
 
