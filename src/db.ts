@@ -3,23 +3,20 @@ import { houseAds, type Ad, type AdFormat } from './ads';
 
 const VIEWABLE_THRESHOLD_MS = 1000;
 const REVENUE_SHARE = 0.5;
+const WEIGHT_FLOOR = 0.1; // baseline weight so a low/zero-CPM ad still gets some exposure
 
-// Connection pool. Your host provides DATABASE_URL (Render/Railway/Neon/etc.).
-// The pool manages many concurrent connections, which is the whole point of
-// moving off SQLite — Postgres handles simultaneous writes properly.
 const connectionString = process.env.DATABASE_URL ?? 'postgres://localhost:5432/waitandearn';
 const useSsl = !!process.env.DATABASE_URL && !/localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL);
 const pool = new Pool({ connectionString, ssl: useSsl ? { rejectUnauthorized: false } : undefined });
 
-// Run ONCE at startup: create tables, add any missing columns, seed house ads.
-// (Postgres supports IF NOT EXISTS for columns, so migrations are simpler here.)
 export async function init(): Promise<void> {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS campaigns (
       id TEXT PRIMARY KEY, format TEXT NOT NULL, headline TEXT NOT NULL, body TEXT NOT NULL,
       image_url TEXT, click_url TEXT NOT NULL,
       impressions_purchased INTEGER NOT NULL, impressions_served INTEGER NOT NULL DEFAULT 0,
-      cpm DOUBLE PRECISION NOT NULL DEFAULT 0
+      cpm DOUBLE PRECISION NOT NULL DEFAULT 0,
+      is_house BOOLEAN NOT NULL DEFAULT false
     );`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS impressions (
@@ -28,36 +25,63 @@ export async function init(): Promise<void> {
     );`);
   await pool.query(`ALTER TABLE impressions ADD COLUMN IF NOT EXISTS install_id TEXT`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS cpm DOUBLE PRECISION NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS is_house BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_ad_id ON impressions(ad_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_install ON impressions(install_id)`);
 
+  // House ads are BACKFILL: seeded with is_house = true so the selector only
+  // reaches for them when no paid campaign is eligible.
   for (const ad of houseAds) {
     await pool.query(
-      `INSERT INTO campaigns (id, format, headline, body, image_url, click_url, impressions_purchased, cpm)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING`,
+      `INSERT INTO campaigns (id, format, headline, body, image_url, click_url, impressions_purchased, cpm, is_house)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8, true) ON CONFLICT (id) DO NOTHING`,
       [ad.id, ad.format, ad.headline, ad.body, ad.imageUrl ?? null, ad.clickUrl, ad.impressionsPurchased, ad.cpm],
     );
-    await pool.query(`UPDATE campaigns SET cpm = $1 WHERE id = $2`, [ad.cpm, ad.id]);
+    await pool.query(`UPDATE campaigns SET cpm = $1, is_house = true WHERE id = $2`, [ad.cpm, ad.id]);
   }
+}
+
+// Weighted random by CPM (with a floor). Higher-paying ads win proportionally
+// more often, but every candidate keeps a nonzero chance and the total weight
+// is always > 0 (so this never divides by zero or starves a $0 ad completely).
+function weightedPick<T extends { cpm: number | string }>(items: T[]): T {
+  const weights = items.map((it) => Number(it.cpm) + WEIGHT_FLOOR);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
+  return items[items.length - 1];
 }
 
 export async function pickEligibleAd(format?: AdFormat, excludeId?: string): Promise<Ad | null> {
   const { rows } = await pool.query(
-    `SELECT id, format, headline, body, image_url, click_url
+    `SELECT id, format, headline, body, image_url, click_url, cpm, is_house
      FROM campaigns
      WHERE impressions_served < impressions_purchased AND ($1::text IS NULL OR format = $1)`,
     [format ?? null],
   );
   if (rows.length === 0) return null;
-  const preferred = excludeId ? rows.filter((r) => r.id !== excludeId) : rows;
-  const choices = preferred.length > 0 ? preferred : rows;
-  const row = choices[Math.floor(Math.random() * choices.length)];
-  return { id: row.id, format: row.format, headline: row.headline, body: row.body, imageUrl: row.image_url ?? undefined, clickUrl: row.click_url };
+
+  // Prefer paid campaigns; fall back to house/backfill ads only when no paid
+  // campaign is eligible — so we never hand paid inventory to a house ad.
+  const paid = rows.filter((r) => !r.is_house);
+  const tier = paid.length > 0 ? paid : rows;
+
+  // Don't repeat the last-shown ad unless it's the only candidate in this tier.
+  let candidates = excludeId ? tier.filter((r) => r.id !== excludeId) : tier;
+  if (candidates.length === 0) candidates = tier;
+
+  const row = weightedPick(candidates);
+  const cpm = Number(row.cpm);
+  return {
+    id: row.id, format: row.format, headline: row.headline, body: row.body,
+    imageUrl: row.image_url ?? undefined, clickUrl: row.click_url,
+    valuePerView: (cpm / 1000) * REVENUE_SHARE,
+  };
 }
 
 export interface NewImpression { adId: string; site: string; viewableMs: number; installId: string; }
 export async function recordImpression(imp: NewImpression): Promise<void> {
-  const client = await pool.connect(); // a transaction needs one dedicated connection
+  const client = await pool.connect();
   try {
     await client.query('BEGIN');
     await client.query(`INSERT INTO impressions (ad_id, site, viewable_ms, install_id) VALUES ($1,$2,$3,$4)`, [imp.adId, imp.site, Math.round(imp.viewableMs), imp.installId]);
@@ -82,8 +106,6 @@ export async function createCampaign(c: NewCampaign): Promise<void> {
   );
 }
 
-// Note the quoted aliases: Postgres lowercases unquoted identifiers, so we quote
-// them to keep camelCase keys the admin page expects. ::int avoids bigint-as-string.
 export async function listCampaigns() {
   const { rows } = await pool.query(
     `SELECT c.id, c.format, c.headline, c.body, c.image_url AS "imageUrl", c.click_url AS "clickUrl",
