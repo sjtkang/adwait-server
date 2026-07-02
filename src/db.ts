@@ -16,8 +16,7 @@ export async function init(): Promise<void> {
       image_url TEXT, click_url TEXT NOT NULL,
       impressions_purchased INTEGER NOT NULL, impressions_served INTEGER NOT NULL DEFAULT 0,
       cpm DOUBLE PRECISION NOT NULL DEFAULT 0,
-      is_house BOOLEAN NOT NULL DEFAULT false,
-      archived BOOLEAN NOT NULL DEFAULT false
+      is_house BOOLEAN NOT NULL DEFAULT false
     );`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS impressions (
@@ -27,7 +26,6 @@ export async function init(): Promise<void> {
   await pool.query(`ALTER TABLE impressions ADD COLUMN IF NOT EXISTS install_id TEXT`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS cpm DOUBLE PRECISION NOT NULL DEFAULT 0`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS is_house BOOLEAN NOT NULL DEFAULT false`);
-  await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_ad_id ON impressions(ad_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_install ON impressions(install_id)`);
 
@@ -58,7 +56,7 @@ export async function pickEligibleAd(format?: AdFormat, excludeId?: string): Pro
   const { rows } = await pool.query(
     `SELECT id, format, headline, body, image_url, click_url, cpm, is_house
      FROM campaigns
-     WHERE impressions_served < impressions_purchased AND archived = false AND ($1::text IS NULL OR format = $1)`,
+     WHERE impressions_served < impressions_purchased AND ($1::text IS NULL OR format = $1)`,
     [format ?? null],
   );
   if (rows.length === 0) return null;
@@ -111,10 +109,10 @@ export async function createCampaign(c: NewCampaign): Promise<void> {
 export async function listCampaigns() {
   const { rows } = await pool.query(
     `SELECT c.id, c.format, c.headline, c.body, c.image_url AS "imageUrl", c.click_url AS "clickUrl",
-            c.impressions_purchased AS "impressionsPurchased", c.impressions_served AS "impressionsServed", c.cpm, c.archived AS "archived",
+            c.impressions_purchased AS "impressionsPurchased", c.impressions_served AS "impressionsServed", c.cpm,
             COUNT(DISTINCT CASE WHEN i.viewable_ms >= $1 THEN i.install_id END)::int AS reach
      FROM campaigns c LEFT JOIN impressions i ON i.ad_id = c.id
-     GROUP BY c.id, c.format, c.headline, c.body, c.image_url, c.click_url, c.impressions_purchased, c.impressions_served, c.cpm, c.archived
+     GROUP BY c.id, c.format, c.headline, c.body, c.image_url, c.click_url, c.impressions_purchased, c.impressions_served, c.cpm
      ORDER BY c.id`,
     [VIEWABLE_THRESHOLD_MS],
   );
@@ -132,13 +130,6 @@ export async function updateCampaign(id: string, f: { headline: string; body: st
 
 export async function addPurchasedImpressions(adId: string, additional: number): Promise<boolean> {
   const res = await pool.query(`UPDATE campaigns SET impressions_purchased = impressions_purchased + $1 WHERE id = $2`, [additional, adId]);
-  return (res.rowCount ?? 0) > 0;
-}
-
-// Soft-stop / re-activate a campaign WITHOUT touching its impression history —
-// unlike delete, which erases the rows users earned against.
-export async function setArchived(id: string, archived: boolean): Promise<boolean> {
-  const res = await pool.query(`UPDATE campaigns SET archived = $1 WHERE id = $2`, [archived, id]);
   return (res.rowCount ?? 0) > 0;
 }
 
