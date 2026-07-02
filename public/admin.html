@@ -23,6 +23,7 @@
       th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
       th { color: #666; font-weight: 600; }
       img.thumb { height: 28px; border-radius: 4px; vertical-align: middle; }
+      tr.archived { opacity: 0.5; }
       td.actions button { margin-right: 4px; padding: 5px 9px; }
       td.actions input { width: 60px; display: inline-block; margin: 0 2px; }
     </style>
@@ -49,7 +50,7 @@
         <label>Click URL <input name="clickUrl" type="url" placeholder="https://advertiser.com/landing" required /></label>
         <label id="budgetRow">Impressions purchased <input name="impressionsPurchased" type="number" min="1" value="1000" required /></label>
         <label>CPM — USD per 1,000 viewable impressions <input name="cpm" type="number" min="0" step="0.01" value="2.00" required /></label>
-        <label id="imageRow"><span id="imageHint">Image file (PNG/JPG/WebP/GIF, max 2 MB)</span> <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /></label>
+        <label id="imageRow"><span id="imageHint">Image file (PNG/JPG/WebP/GIF, max 2 MB, max 2000×2000px)</span> <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /></label>
         <button type="submit" id="submitBtn">Create campaign</button>
         <button type="button" id="cancelBtn" class="secondary" style="display:none">Cancel edit</button>
         <p id="msg" class="msg"></p>
@@ -96,7 +97,7 @@
         formatSel.disabled = false;
         budgetInput.disabled = false;
         budgetRow.style.display = '';
-        imageHint.textContent = 'Image file (PNG/JPG/WebP/GIF, max 2 MB)';
+        imageHint.textContent = 'Image file (PNG/JPG/WebP/GIF, max 2 MB, max 2000×2000px)';
         formTitle.textContent = 'New campaign';
         submitBtn.textContent = 'Create campaign';
         cancelBtn.style.display = 'none';
@@ -172,6 +173,9 @@
           const amount = Number(input && input.value);
           if (!Number.isFinite(amount) || amount < 1) { alert('Enter a top-up amount of at least 1.'); return; }
           doAction('POST', '/api/admin/campaigns/' + encodeURIComponent(id) + '/topup', { amount });
+        } else if (action === 'archive') {
+          const c = currentCampaigns.find((x) => x.id === id);
+          if (c) doAction('POST', '/api/admin/campaigns/' + encodeURIComponent(id) + '/archive', { archived: !c.archived });
         }
       });
 
@@ -188,11 +192,12 @@
           rows.innerHTML = '';
           for (const c of currentCampaigns) {
             const tr = document.createElement('tr');
+            if (c.archived) tr.classList.add('archived');
             // Show a thumbnail for image ads.
             const media = c.imageUrl ? '<img class="thumb" src="' + c.imageUrl + '" alt="" />' : '—';
             tr.innerHTML =
               '<td>' + escapeHtml(c.id) + '</td>' +
-              '<td>' + escapeHtml(c.format) + '</td>' +
+              '<td>' + escapeHtml(c.format) + (c.archived ? ' · archived' : '') + '</td>' +
               '<td>' + escapeHtml(c.headline) + '</td>' +
               '<td>$' + Number(c.cpm).toFixed(2) + '</td>' +
               '<td>' + c.impressionsServed + ' / ' + c.impressionsPurchased + '</td>' +
@@ -202,6 +207,7 @@
                 '<button data-action="edit" data-id="' + escapeHtml(c.id) + '">Edit</button>' +
                 '<input type="number" min="1" value="1000" data-topup-input="' + escapeHtml(c.id) + '" />' +
                 '<button data-action="topup" data-id="' + escapeHtml(c.id) + '">+ Budget</button>' +
+                '<button data-action="archive" data-id="' + escapeHtml(c.id) + '">' + (c.archived ? 'Unarchive' : 'Archive') + '</button>' +
                 '<button class="danger" data-action="delete" data-id="' + escapeHtml(c.id) + '">Delete</button>' +
               '</td>';
             rows.appendChild(tr);
