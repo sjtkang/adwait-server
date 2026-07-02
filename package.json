@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1077.0",
-    "cors": "latest",
     "express": "latest",
     "image-size": "^2.0.2",
     "multer": "^2.2.0",
@@ -19,7 +18,6 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "latest",
-    "@types/cors": "latest",
     "@types/express": "latest",
     "@types/multer": "^2.1.0",
     "@types/node": "latest",
