@@ -1,9 +1,23 @@
 import { Pool } from 'pg';
+import { randomUUID } from 'node:crypto';
 import { houseAds, type Ad, type AdFormat } from './ads';
 
 const VIEWABLE_THRESHOLD_MS = 1000;
 const REVENUE_SHARE = 0.5;
 const WEIGHT_FLOOR = 0.1; // baseline weight so a low/zero-CPM ad still gets some exposure
+
+// --- serve-token anti-fraud settings ---------------------------------------
+// Every served ad gets a single-use token; impressions must return it. Caps are
+// per install and sit far above real human usage (7s rotation ~= 8/min in one
+// tab), so they only ever throttle scripts. Overridable via env for tuning.
+const SERVE_CAP_PER_MIN = Number(process.env.SERVE_CAP_PER_MIN ?? 60);
+const SERVE_CAP_PER_DAY = Number(process.env.SERVE_CAP_PER_DAY ?? 1000);
+const TOKEN_TTL_MS = 30 * 60 * 1000;   // a token is claimable for 30 minutes
+const ELAPSED_SLACK_MS = 2000;         // clock slack for the plausibility check
+
+// Thrown when an impression's token is missing/used/expired/mismatched, or the
+// claimed viewable time is physically impossible. index.ts maps this to a 400.
+export class InvalidServeTokenError extends Error {}
 
 const connectionString = process.env.DATABASE_URL ?? 'postgres://localhost:5432/waitandearn';
 const useSsl = !!process.env.DATABASE_URL && !/localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL);
@@ -30,6 +44,12 @@ export async function init(): Promise<void> {
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_ad_id ON impressions(ad_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_install ON impressions(install_id)`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ad_serves (
+      token TEXT PRIMARY KEY, ad_id TEXT NOT NULL, install_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(), used BOOLEAN NOT NULL DEFAULT false
+    );`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_serves_install_time ON ad_serves(install_id, created_at)`);
 
   // House ads are BACKFILL: seeded with is_house = true so the selector only
   // reaches for them when no paid campaign is eligible.
@@ -52,6 +72,22 @@ function weightedPick<T extends { cpm: number | string }>(items: T[]): T {
   let r = Math.random() * total;
   for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
   return items[items.length - 1];
+}
+
+// Issue a single-use token tying this ad serve to this install. Returns null
+// when the install is over its rate cap (the caller then serves no ad).
+export async function issueServeToken(adId: string, installId: string): Promise<string | null> {
+  // Opportunistic cleanup of long-expired tokens (~2% of serves pay this cost).
+  if (Math.random() < 0.02) {
+    await pool.query(`DELETE FROM ad_serves WHERE created_at < $1`, [new Date(Date.now() - 2 * 24 * 3600 * 1000)]);
+  }
+  const perMin = await pool.query(`SELECT COUNT(*)::int AS c FROM ad_serves WHERE install_id = $1 AND created_at > $2`, [installId, new Date(Date.now() - 60_000)]);
+  if (Number(perMin.rows[0].c) >= SERVE_CAP_PER_MIN) return null;
+  const perDay = await pool.query(`SELECT COUNT(*)::int AS c FROM ad_serves WHERE install_id = $1 AND created_at > $2`, [installId, new Date(Date.now() - 24 * 3600 * 1000)]);
+  if (Number(perDay.rows[0].c) >= SERVE_CAP_PER_DAY) return null;
+  const token = randomUUID();
+  await pool.query(`INSERT INTO ad_serves (token, ad_id, install_id) VALUES ($1,$2,$3)`, [token, adId, installId]);
+  return token;
 }
 
 export async function pickEligibleAd(format?: AdFormat, excludeId?: string): Promise<Ad | null> {
@@ -81,11 +117,31 @@ export async function pickEligibleAd(format?: AdFormat, excludeId?: string): Pro
   };
 }
 
-export interface NewImpression { adId: string; site: string; viewableMs: number; installId: string; }
+export interface NewImpression { adId: string; site: string; viewableMs: number; installId: string; serveToken: string; }
 export async function recordImpression(imp: NewImpression): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    // Consume the serve token atomically: it must exist, be unused, be young
+    // enough, and match BOTH the ad and the install. Marking it used in the
+    // same statement makes replay impossible (a second claim finds no row).
+    const tok = await client.query(
+      `UPDATE ad_serves SET used = true
+       WHERE token = $1 AND used = false AND ad_id = $2 AND install_id = $3 AND created_at > $4
+       RETURNING created_at`,
+      [imp.serveToken, imp.adId, imp.installId, new Date(Date.now() - TOKEN_TTL_MS)],
+    );
+    if ((tok.rowCount ?? 0) === 0) {
+      throw new InvalidServeTokenError('unknown, used, expired, or mismatched serve token');
+    }
+    // Physical plausibility: you cannot have viewed the ad for longer than the
+    // time that has passed since we served it.
+    const elapsedMs = Date.now() - new Date(tok.rows[0].created_at).getTime();
+    if (imp.viewableMs > elapsedMs + ELAPSED_SLACK_MS) {
+      throw new InvalidServeTokenError('claimed viewable time exceeds time since serve');
+    }
+
     await client.query(`INSERT INTO impressions (ad_id, site, viewable_ms, install_id) VALUES ($1,$2,$3,$4)`, [imp.adId, imp.site, Math.round(imp.viewableMs), imp.installId]);
     if (imp.viewableMs >= VIEWABLE_THRESHOLD_MS) {
       await client.query(`UPDATE campaigns SET impressions_served = impressions_served + 1 WHERE id = $1`, [imp.adId]);

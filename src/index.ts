@@ -1,9 +1,8 @@
 import express from 'express';
-import cors from 'cors';
 import multer from 'multer';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived } from './db';
+import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived, issueServeToken, InvalidServeTokenError } from './db';
 import { type AdFormat } from './ads';
 import { uploadAdFile, isAllowedAdMime, storageConfigured, readImageSize, MAX_IMAGE_DIMENSION } from './storage';
 
@@ -11,7 +10,9 @@ const PORT = Number(process.env.PORT) || 3000;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? 'changeme-dev-token';
 
 const app = express();
-app.use(cors());
+// No CORS on purpose. The extension's background fetches are exempt from CORS
+// via host_permissions, and the admin page is same-origin — so browsers now
+// refuse cross-site pages trying to POST events from visitors.
 app.use(express.json());
 
 // Files are held in MEMORY just long enough to forward them to object storage,
@@ -45,16 +46,25 @@ app.get('/api/health', (_req, res) => { res.json({ ok: true }); });
 app.get('/api/ad', ah(async (req, res) => {
   const format = req.query.format as AdFormat | undefined;
   const exclude = typeof req.query.exclude === 'string' ? req.query.exclude : undefined;
+  const installId = typeof req.query.installId === 'string' ? req.query.installId : '';
+  if (!installId || installId.length > 64) { res.status(400).json({ error: 'installId required' }); return; }
   const ad = await pickEligibleAd(format, exclude);
   if (!ad) { res.status(204).end(); return; }
-  res.json(ad);
+  const serveToken = await issueServeToken(ad.id, installId);
+  if (!serveToken) { res.status(204).end(); return; } // over rate cap: no ad for this install right now
+  res.json({ ...ad, serveToken });
 }));
 
 app.post('/api/events', ah(async (req, res) => {
-  const { adId, site, viewableMs, installId } = req.body ?? {};
-  const isValid = typeof adId === 'string' && adId.length > 0 && typeof site === 'string' && site.length > 0 && typeof installId === 'string' && installId.length > 0 && installId.length <= 64 && typeof viewableMs === 'number' && Number.isFinite(viewableMs) && viewableMs >= 0 && viewableMs <= 1000 * 60 * 30;
+  const { adId, site, viewableMs, installId, serveToken } = req.body ?? {};
+  const isValid = typeof adId === 'string' && adId.length > 0 && typeof site === 'string' && site.length > 0 && typeof installId === 'string' && installId.length > 0 && installId.length <= 64 && typeof serveToken === 'string' && serveToken.length >= 8 && serveToken.length <= 128 && typeof viewableMs === 'number' && Number.isFinite(viewableMs) && viewableMs >= 0 && viewableMs <= 1000 * 60 * 30;
   if (!isValid) { res.status(400).json({ error: 'invalid event' }); return; }
-  await recordImpression({ adId, site, viewableMs, installId });
+  try {
+    await recordImpression({ adId, site, viewableMs, installId, serveToken });
+  } catch (e) {
+    if (e instanceof InvalidServeTokenError) { res.status(400).json({ error: `rejected: ${e.message}` }); return; }
+    throw e;
+  }
   res.json({ ok: true });
 }));
 
