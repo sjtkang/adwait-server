@@ -3,9 +3,9 @@ import cors from 'cors';
 import multer from 'multer';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived } from './db';
+import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign } from './db';
 import { type AdFormat } from './ads';
-import { uploadAdFile, isAllowedAdMime, storageConfigured, readImageSize, MAX_IMAGE_DIMENSION } from './storage';
+import { uploadAdFile, isAllowedAdMime, storageConfigured } from './storage';
 
 const PORT = Number(process.env.PORT) || 3000;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? 'changeme-dev-token';
@@ -27,18 +27,6 @@ const upload = multer({
 // (Express 4 doesn't catch async errors on its own) instead of hanging.
 type AsyncHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => Promise<unknown>;
 const ah = (fn: AsyncHandler) => (req: express.Request, res: express.Response, next: express.NextFunction) => { Promise.resolve(fn(req, res, next)).catch(next); };
-
-// Rejects (and returns true) if the uploaded image exceeds the dimension cap.
-// Display is CSS-bounded to the ad box; this only guards decode/bandwidth cost.
-function rejectIfImageTooLarge(res: express.Response, buffer: Buffer): boolean {
-  const dim = readImageSize(buffer);
-  if (!dim) { res.status(400).json({ error: 'could not read image dimensions' }); return true; }
-  if (dim.width > MAX_IMAGE_DIMENSION || dim.height > MAX_IMAGE_DIMENSION) {
-    res.status(400).json({ error: `image too large: ${dim.width}x${dim.height}px (max ${MAX_IMAGE_DIMENSION}px per side)` });
-    return true;
-  }
-  return false;
-}
 
 app.get('/api/health', (_req, res) => { res.json({ ok: true }); });
 
@@ -84,7 +72,6 @@ app.post('/api/admin/campaigns', requireAdmin, upload.single('image'), ah(async 
   if (!valid) { res.status(400).json({ error: 'invalid campaign fields' }); return; }
   // Image ads need a file; text ads don't.
   if (format === 'image' && !req.file) { res.status(400).json({ error: 'image ads require an image file' }); return; }
-  if (req.file && rejectIfImageTooLarge(res, req.file.buffer)) return;
   const imageUrl = req.file ? await uploadAdFile(req.file.buffer, req.file.mimetype) : undefined;
   const id = `camp_${randomUUID().slice(0, 8)}`;
   await createCampaign({ id, format, headline, body, imageUrl, clickUrl, impressionsPurchased: Math.floor(impressionsPurchased), cpm });
@@ -96,7 +83,6 @@ app.patch('/api/admin/campaigns/:id', requireAdmin, upload.single('image'), ah(a
   const cpm = Number(req.body?.cpm);
   const valid = typeof headline === 'string' && headline.length > 0 && headline.length <= 200 && typeof body === 'string' && body.length <= 500 && typeof clickUrl === 'string' && /^https?:\/\//i.test(clickUrl) && clickUrl.length <= 500 && Number.isFinite(cpm) && cpm >= 0;
   if (!valid) { res.status(400).json({ error: 'invalid campaign fields' }); return; }
-  if (req.file && rejectIfImageTooLarge(res, req.file.buffer)) return;
   // New file is optional on edit; when present it replaces the stored URL.
   const imageUrl = req.file ? await uploadAdFile(req.file.buffer, req.file.mimetype) : undefined;
   const ok = await updateCampaign(req.params.id, { headline, body, clickUrl, cpm, imageUrl });
@@ -108,14 +94,6 @@ app.post('/api/admin/campaigns/:id/topup', requireAdmin, ah(async (req, res) => 
   const amount = Number(req.body?.amount);
   if (!Number.isFinite(amount) || amount < 1) { res.status(400).json({ error: 'amount must be a number >= 1' }); return; }
   const ok = await addPurchasedImpressions(req.params.id, Math.floor(amount));
-  if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
-  res.json({ ok: true });
-}));
-
-app.post('/api/admin/campaigns/:id/archive', requireAdmin, ah(async (req, res) => {
-  const archived = req.body?.archived;
-  if (typeof archived !== 'boolean') { res.status(400).json({ error: 'archived (boolean) required' }); return; }
-  const ok = await setArchived(req.params.id, archived);
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
   res.json({ ok: true });
 }));

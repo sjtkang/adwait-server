@@ -13,7 +13,6 @@
     "@aws-sdk/client-s3": "^3.1077.0",
     "cors": "latest",
     "express": "latest",
-    "image-size": "^2.0.2",
     "multer": "^2.2.0",
     "pg": "^8.22.0"
   },

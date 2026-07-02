@@ -1,22 +1,5 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'node:crypto';
-import imageSize from 'image-size';
-
-// Generous cap: a 300px box stays crisp even on 3x displays well under this,
-// so this only rejects pathologically large creatives (wasteful to decode).
-export const MAX_IMAGE_DIMENSION = 2000;
-
-// Reads pixel dimensions from the file header only (no full decode). Returns
-// null if the buffer isn't a readable image.
-export function readImageSize(buffer: Buffer): { width: number; height: number } | null {
-  try {
-    const dim = imageSize(buffer);
-    if (!dim || typeof dim.width !== 'number' || typeof dim.height !== 'number') return null;
-    return { width: dim.width, height: dim.height };
-  } catch {
-    return null;
-  }
-}
 
 // Maps each accepted upload type to the file extension we store it under.
 // This doubles as the allow-list: anything not in here is rejected.
