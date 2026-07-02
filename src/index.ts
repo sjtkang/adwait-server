@@ -81,6 +81,8 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
   next();
 }
 
+app.get('/privacy', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'privacy.html')); });
+
 app.get('/admin', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'admin.html')); });
 
 app.get('/api/admin/campaigns', requireAdmin, ah(async (_req, res) => { res.json(await listCampaigns()); }));
