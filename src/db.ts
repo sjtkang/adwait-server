@@ -244,8 +244,16 @@ export async function getPayoutSummary(installId: string) {
   const claimedRes = await pool.query(`SELECT COALESCE(SUM(amount), 0) AS s FROM payout_claims WHERE install_id = $1 AND status <> 'rejected'`, [installId]);
   const claimedTotal = Number(claimedRes.rows[0].s);
   const availableBalance = Math.max(0, e.estimatedEarnings - claimedTotal);
+  const paidRes = await pool.query(`SELECT COALESCE(SUM(amount), 0) AS s FROM payout_claims WHERE install_id = $1 AND status = 'paid'`, [installId]);
   const pend = await pool.query(`SELECT amount, requested_at AS "requestedAt" FROM payout_claims WHERE install_id = $1 AND status = 'pending' ORDER BY requested_at DESC LIMIT 1`, [installId]);
-  return { ...e, claimedTotal, availableBalance, minCashout: MIN_CASHOUT_USD, pendingClaim: pend.rows[0] ?? null };
+  // Recent claim history for the popup's History tab (capped so the payload stays small).
+  const claimsRes = await pool.query(
+    `SELECT id, destination_type AS "destinationType", destination, amount, status,
+            requested_at AS "requestedAt", resolved_at AS "resolvedAt"
+     FROM payout_claims WHERE install_id = $1 ORDER BY requested_at DESC LIMIT 20`,
+    [installId],
+  );
+  return { ...e, claimedTotal, availableBalance, paidTotal: Number(paidRes.rows[0].s), minCashout: MIN_CASHOUT_USD, pendingClaim: pend.rows[0] ?? null, claims: claimsRes.rows };
 }
 
 export async function createPayoutClaim(installId: string, destinationType: 'paypal' | 'crypto', destination: string) {
