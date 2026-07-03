@@ -21,6 +21,8 @@ export class InvalidServeTokenError extends Error {}
 
 // Minimum cash-out (USD). Env-overridable so you can test with tiny balances.
 const MIN_CASHOUT_USD = Number(process.env.MIN_CASHOUT_USD ?? 5);
+// Minimum gap between payout requests from one install (blocks double-submit races).
+const CLAIM_COOLDOWN_MS = Number(process.env.CLAIM_COOLDOWN_MS ?? 30_000);
 
 // Thrown when a payout claim is invalid (below minimum, duplicate pending, ...).
 // index.ts maps this to a 400 with the message shown to the user.
@@ -245,7 +247,7 @@ export async function getPayoutSummary(installId: string) {
   const claimedTotal = Number(claimedRes.rows[0].s);
   const availableBalance = Math.max(0, e.estimatedEarnings - claimedTotal);
   const paidRes = await pool.query(`SELECT COALESCE(SUM(amount), 0) AS s FROM payout_claims WHERE install_id = $1 AND status = 'paid'`, [installId]);
-  const pend = await pool.query(`SELECT amount, requested_at AS "requestedAt" FROM payout_claims WHERE install_id = $1 AND status = 'pending' ORDER BY requested_at DESC LIMIT 1`, [installId]);
+  const pendRes = await pool.query(`SELECT COALESCE(SUM(amount), 0) AS s, COUNT(*)::int AS c FROM payout_claims WHERE install_id = $1 AND status = 'pending'`, [installId]);
   // Recent claim history for the popup's History tab (capped so the payload stays small).
   const claimsRes = await pool.query(
     `SELECT id, destination_type AS "destinationType", destination, amount, status,
@@ -253,15 +255,19 @@ export async function getPayoutSummary(installId: string) {
      FROM payout_claims WHERE install_id = $1 ORDER BY requested_at DESC LIMIT 20`,
     [installId],
   );
-  return { ...e, claimedTotal, availableBalance, paidTotal: Number(paidRes.rows[0].s), minCashout: MIN_CASHOUT_USD, pendingClaim: pend.rows[0] ?? null, claims: claimsRes.rows };
+  return { ...e, claimedTotal, availableBalance, paidTotal: Number(paidRes.rows[0].s), pendingTotal: Number(pendRes.rows[0].s), pendingCount: Number(pendRes.rows[0].c), minCashout: MIN_CASHOUT_USD, claims: claimsRes.rows };
 }
 
 export async function createPayoutClaim(installId: string, destinationType: 'paypal' | 'crypto', destination: string) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const pending = await client.query(`SELECT id FROM payout_claims WHERE install_id = $1 AND status = 'pending'`, [installId]);
-    if ((pending.rowCount ?? 0) > 0) throw new PayoutClaimError('a payout request is already pending for this install');
+    // Multiple pending payouts are allowed: each new claim takes only the balance
+    // accrued since the previous one (available already subtracts prior claims).
+    // The short cooldown blocks double-click / race duplicates; manual review of
+    // every claim remains the final backstop.
+    const recent = await client.query(`SELECT id FROM payout_claims WHERE install_id = $1 AND requested_at > $2`, [installId, new Date(Date.now() - CLAIM_COOLDOWN_MS)]);
+    if ((recent.rowCount ?? 0) > 0) throw new PayoutClaimError('please wait a moment between payout requests');
     const earnRes = await client.query(
       `SELECT COALESCE(SUM(c.cpm), 0) AS "cpmSum" FROM impressions i JOIN campaigns c ON c.id = i.ad_id
        WHERE i.install_id = $1 AND i.viewable_ms >= $2`,
