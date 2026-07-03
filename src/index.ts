@@ -186,5 +186,5 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 init()
-  .then(() => { app.listen(PORT, () => console.log(`Wait & Earn backend on port ${PORT} — object storage ${storageConfigured() ? 'configured' : 'NOT configured (uploads will fail until S3_* env vars are set)'}`)); })
+  .then(() => { app.listen(PORT, () => console.log(`Adwait backend on port ${PORT} — object storage ${storageConfigured() ? 'configured' : 'NOT configured (uploads will fail until S3_* env vars are set)'}`)); })
   .catch((e) => { console.error('Database init failed:', e); process.exit(1); });
