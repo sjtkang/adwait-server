@@ -24,6 +24,7 @@
       th { color: #666; font-weight: 600; }
       img.thumb { height: 28px; border-radius: 4px; vertical-align: middle; }
       tr.archived { opacity: 0.5; }
+      .warn { color: #c0392b; font-weight: 600; }
       td.actions button { margin-right: 4px; padding: 5px 9px; }
       td.actions input { width: 60px; display: inline-block; margin: 0 2px; }
     </style>
@@ -64,6 +65,16 @@
           <tr><th>ID</th><th>Format</th><th>Headline</th><th>CPM</th><th>Served / Bought</th><th>Reach</th><th>Img</th><th>Actions</th></tr>
         </thead>
         <tbody id="rows"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Payout claims <button id="refreshClaims" class="secondary" type="button">Refresh</button></h2>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Install</th><th>Destination</th><th>Amount</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="claimRows"></tbody>
       </table>
     </section>
 
@@ -218,9 +229,64 @@
         }
       }
 
+      // ----- payout claims -----
+      const claimRows = document.getElementById('claimRows');
+
+      async function loadClaims() {
+        try {
+          const res = await fetch('/api/admin/claims', { headers: authHeaders() });
+          if (!res.ok) {
+            claimRows.innerHTML = '<tr><td colspan="8">' + (res.status === 401 ? 'Enter a valid admin token to view claims.' : 'Error ' + res.status) + '</td></tr>';
+            return;
+          }
+          const claims = await res.json();
+          claimRows.innerHTML = '';
+          for (const c of claims) {
+            const tr = document.createElement('tr');
+            // >1 install sharing one destination is the multi-profile-farming signal.
+            const shared = c.installsSharingDestination > 1
+              ? '<span class="warn">' + c.installsSharingDestination + ' installs</span>'
+              : '1';
+            const when = new Date(c.requestedAt).toLocaleDateString();
+            const actions = c.status === 'pending'
+              ? '<button data-claim="paid" data-id="' + c.id + '">Mark paid</button>' +
+                '<button class="danger" data-claim="rejected" data-id="' + c.id + '">Reject</button>'
+              : '&mdash;';
+            tr.innerHTML =
+              '<td>' + c.id + '</td>' +
+              '<td title="' + escapeHtml(c.installId) + '">' + escapeHtml(String(c.installId).slice(0, 8)) + '&hellip;</td>' +
+              '<td>' + escapeHtml(c.destinationType) + ': ' + escapeHtml(c.destination) + '</td>' +
+              '<td>$' + Number(c.amount).toFixed(4) + '</td>' +
+              '<td>' + escapeHtml(c.status) + '</td>' +
+              '<td>' + when + '</td>' +
+              '<td>' + shared + '</td>' +
+              '<td class="actions">' + actions + '</td>';
+            claimRows.appendChild(tr);
+          }
+          if (claims.length === 0) claimRows.innerHTML = '<tr><td colspan="8">No payout claims yet.</td></tr>';
+        } catch {
+          claimRows.innerHTML = '<tr><td colspan="8">Network error — is the server running?</td></tr>';
+        }
+      }
+
+      claimRows.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-claim]');
+        if (!btn) return;
+        const status = btn.getAttribute('data-claim');
+        const id = btn.getAttribute('data-id');
+        const question = status === 'paid'
+          ? 'Mark claim ' + id + ' as PAID? Do this only AFTER you have actually sent the money.'
+          : 'Reject claim ' + id + '? The amount returns to the available balance automatically.';
+        if (!confirm(question)) return;
+        doAction('POST', '/api/admin/claims/' + encodeURIComponent(id) + '/resolve', { status }).then(loadClaims);
+      });
+
+      document.getElementById('refreshClaims').addEventListener('click', loadClaims);
+
       document.getElementById('refresh').addEventListener('click', loadList);
       enterCreateMode();
       loadList();
+      loadClaims();
     </script>
   </body>
 </html>

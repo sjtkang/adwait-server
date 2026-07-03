@@ -19,14 +19,14 @@
   </head>
   <body>
     <h1>Privacy Policy — Wait &amp; Earn</h1>
-    <p class="effective">Effective July 2, 2026</p>
+    <p class="effective">Effective July 3, 2026</p>
 
     <p>Wait &amp; Earn ("the extension", "we") shows one clearly labeled advertisement in a small corner overlay while an AI chat response is being generated on supported sites, and credits you a share of the ad revenue. This policy describes exactly what data the extension handles. It is intentionally short, because we handle very little.</p>
 
     <div class="summary">
       <strong>The short version</strong>
       <ul>
-        <li>No account, no sign-in, no email. A random ID is all we use.</li>
+        <li>No account, no sign-in. A random ID is all we use &mdash; until you cash out, when you type only a payout destination.</li>
         <li>We never read, store, or transmit your prompts or the AI's responses.</li>
         <li>The extension runs only on chatgpt.com, claude.ai, and gemini.google.com — and you can switch each site off.</li>
         <li>Per ad, we record three things: which ad, which supported site, and how long the ad was actually on screen.</li>
@@ -50,6 +50,7 @@
     <ul>
       <li>When an ad is requested: your random install ID (so we can issue a single-use serve token and apply rate limits).</li>
       <li>When an ad finishes showing: the ad's ID, which supported site it appeared on, how many milliseconds it was viewable, your install ID, and the serve token. Records carry a timestamp.</li>
+      <li>If you request a cash-out: your chosen payout destination (a PayPal email address or a USDC wallet address) and the amount of the request.</li>
     </ul>
     <p>That is the complete list. We use this data to calculate your revenue share, to bill advertisers for viewable impressions, and to detect fraudulent activity.</p>
 
@@ -57,13 +58,13 @@
     <ul>
       <li>Your prompts, the AI's responses, or any other page content.</li>
       <li>Your browsing history, or anything from sites other than the three supported sites.</li>
-      <li>Your name, email address, or any account identity — no sign-in exists.</li>
+      <li>Your name or any account identity — no sign-in exists. The only contact detail we can ever receive is a payout destination you type yourself at cash-out.</li>
       <li>Ad clicks. Clicking an ad simply opens the advertiser's site in a new tab; we do not currently record it.</li>
       <li>Cookies. We set none.</li>
     </ul>
 
-    <h2>Earnings and future payouts</h2>
-    <p>Earnings shown in the popup are estimates based on each campaign's rate and are finalized against advertiser-verified counts. When cash-out launches, you will be asked — only at the moment you cash out — for a payout destination such as a PayPal email or a crypto wallet address. That will be the first time we could receive contact information from you, and this policy will be updated before that feature ships.</p>
+    <h2>Earnings and cash-out</h2>
+    <p>Earnings shown in the popup are estimates based on each campaign's rate and are finalized against advertiser-verified counts. When your available balance reaches the cash-out minimum, you may request a payout from the popup. Only at that moment do we ask for a payout destination — a PayPal email address or a USDC wallet address. We use it solely to send your payment, to detect abuse (for example, one destination claiming from many different installs), and to meet tax and accounting obligations where they apply. Payout requests are reviewed and paid after an advertiser-reconciliation window, and claim records (destination, amount, status, dates) are retained for accounting. If you never cash out, we never receive any contact information from you. Your popup also shows an "earnings key" (your random install ID) that you can copy and later paste into a fresh install to restore your balance — treat it like a password, since anyone holding it can direct that balance at cash-out.</p>
 
     <h2>Advertisers and service providers</h2>
     <p>Advertisers receive only aggregate statistics: total viewable impressions and unique-install reach for their campaign. They never receive your install ID. Our infrastructure providers process data on our behalf: Render (application hosting), Neon (database), and Cloudflare R2 (ad image storage).</p>
@@ -81,6 +82,6 @@
     <p>We will post any changes on this page with a new effective date.</p>
 
     <h2>Contact</h2>
-    <p>Questions or deletion requests: <a href="mailto:sjtkang@gmail.com">sjtkang@gmail.com</a></p>
+    <p>Questions or deletion requests: <a href="mailto:YOUR-CONTACT-EMAIL@example.com">YOUR-CONTACT-EMAIL@example.com</a></p>
   </body>
 </html>

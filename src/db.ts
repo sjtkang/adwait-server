@@ -19,6 +19,13 @@ const ELAPSED_SLACK_MS = 2000;         // clock slack for the plausibility check
 // claimed viewable time is physically impossible. index.ts maps this to a 400.
 export class InvalidServeTokenError extends Error {}
 
+// Minimum cash-out (USD). Env-overridable so you can test with tiny balances.
+const MIN_CASHOUT_USD = Number(process.env.MIN_CASHOUT_USD ?? 10);
+
+// Thrown when a payout claim is invalid (below minimum, duplicate pending, ...).
+// index.ts maps this to a 400 with the message shown to the user.
+export class PayoutClaimError extends Error {}
+
 const connectionString = process.env.DATABASE_URL ?? 'postgres://localhost:5432/waitandearn';
 const useSsl = !!process.env.DATABASE_URL && !/localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL);
 const pool = new Pool({ connectionString, ssl: useSsl ? { rejectUnauthorized: false } : undefined });
@@ -50,6 +57,14 @@ export async function init(): Promise<void> {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now(), used BOOLEAN NOT NULL DEFAULT false
     );`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_serves_install_time ON ad_serves(install_id, created_at)`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS payout_claims (
+      id BIGSERIAL PRIMARY KEY, install_id TEXT NOT NULL,
+      destination_type TEXT NOT NULL, destination TEXT NOT NULL,
+      amount DOUBLE PRECISION NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
+      requested_at TIMESTAMPTZ NOT NULL DEFAULT now(), resolved_at TIMESTAMPTZ
+    );`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_claims_install ON payout_claims(install_id)`);
 
   // House ads are BACKFILL: seeded with is_house = true so the selector only
   // reaches for them when no paid campaign is eligible.
@@ -224,6 +239,72 @@ export async function getEarnings(installId: string) {
   const row = rows[0];
   const cpmSum = Number(row.cpmSum);
   return { impressions: Number(row.impressions), estimatedEarnings: (cpmSum / 1000) * REVENUE_SHARE };
+}
+
+// ---------------- payouts ----------------
+// Balance model: available = earned (from the impressions ledger) minus every
+// claim that is pending or paid. Rejecting a claim therefore frees its amount
+// automatically — nothing to "refund", the subtraction just goes away.
+
+export async function getPayoutSummary(installId: string) {
+  const e = await getEarnings(installId);
+  const claimedRes = await pool.query(`SELECT COALESCE(SUM(amount), 0) AS s FROM payout_claims WHERE install_id = $1 AND status <> 'rejected'`, [installId]);
+  const claimedTotal = Number(claimedRes.rows[0].s);
+  const availableBalance = Math.max(0, e.estimatedEarnings - claimedTotal);
+  const pend = await pool.query(`SELECT amount, requested_at AS "requestedAt" FROM payout_claims WHERE install_id = $1 AND status = 'pending' ORDER BY requested_at DESC LIMIT 1`, [installId]);
+  return { ...e, claimedTotal, availableBalance, minCashout: MIN_CASHOUT_USD, pendingClaim: pend.rows[0] ?? null };
+}
+
+export async function createPayoutClaim(installId: string, destinationType: 'paypal' | 'crypto', destination: string) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const pending = await client.query(`SELECT id FROM payout_claims WHERE install_id = $1 AND status = 'pending'`, [installId]);
+    if ((pending.rowCount ?? 0) > 0) throw new PayoutClaimError('a payout request is already pending for this install');
+    const earnRes = await client.query(
+      `SELECT COALESCE(SUM(c.cpm), 0) AS "cpmSum" FROM impressions i JOIN campaigns c ON c.id = i.ad_id
+       WHERE i.install_id = $1 AND i.viewable_ms >= $2`,
+      [installId, VIEWABLE_THRESHOLD_MS],
+    );
+    const earned = (Number(earnRes.rows[0].cpmSum) / 1000) * REVENUE_SHARE;
+    const claimedRes = await client.query(`SELECT COALESCE(SUM(amount), 0) AS s FROM payout_claims WHERE install_id = $1 AND status <> 'rejected'`, [installId]);
+    const available = Math.max(0, earned - Number(claimedRes.rows[0].s));
+    if (available < MIN_CASHOUT_USD) throw new PayoutClaimError(`balance $${available.toFixed(4)} is below the $${MIN_CASHOUT_USD} minimum`);
+    const ins = await client.query(
+      `INSERT INTO payout_claims (install_id, destination_type, destination, amount) VALUES ($1,$2,$3,$4)
+       RETURNING id, amount, requested_at AS "requestedAt"`,
+      [installId, destinationType, destination, available],
+    );
+    await client.query('COMMIT');
+    return ins.rows[0];
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+// Admin view. The shared-destination count is the sybil signal: one PayPal
+// email or wallet behind many installs is one person running many profiles.
+export async function listClaims() {
+  const { rows } = await pool.query(
+    `SELECT id, install_id AS "installId", destination_type AS "destinationType", destination, amount, status,
+            requested_at AS "requestedAt", resolved_at AS "resolvedAt"
+     FROM payout_claims ORDER BY requested_at DESC`,
+  );
+  const byDest = new Map<string, Set<string>>();
+  for (const r of rows) {
+    const k = String(r.destination).toLowerCase();
+    if (!byDest.has(k)) byDest.set(k, new Set());
+    byDest.get(k)!.add(String(r.installId));
+  }
+  return rows.map((r) => ({ ...r, installsSharingDestination: byDest.get(String(r.destination).toLowerCase())!.size }));
+}
+
+export async function resolveClaim(id: number, status: 'paid' | 'rejected'): Promise<boolean> {
+  const res = await pool.query(`UPDATE payout_claims SET status = $1, resolved_at = now() WHERE id = $2 AND status = 'pending'`, [status, id]);
+  return (res.rowCount ?? 0) > 0;
 }
 
 export async function getStats() {

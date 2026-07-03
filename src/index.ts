@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived, issueServeToken, InvalidServeTokenError } from './db';
+import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived, issueServeToken, InvalidServeTokenError, getPayoutSummary, createPayoutClaim, PayoutClaimError, listClaims, resolveClaim } from './db';
 import { type AdFormat } from './ads';
 import { uploadAdFile, isAllowedAdMime, storageConfigured, readImageSize, MAX_IMAGE_DIMENSION } from './storage';
 
@@ -74,6 +74,35 @@ app.get('/api/earnings', ah(async (req, res) => {
   res.json(await getEarnings(installId));
 }));
 
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
+const EVM_ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
+
+app.get('/api/payout/summary', ah(async (req, res) => {
+  const installId = typeof req.query.installId === 'string' ? req.query.installId : '';
+  if (!installId || installId.length > 64) { res.status(400).json({ error: 'installId required' }); return; }
+  res.json(await getPayoutSummary(installId));
+}));
+
+app.post('/api/payout/claim', ah(async (req, res) => {
+  const { installId, destinationType } = req.body ?? {};
+  let destination = typeof req.body?.destination === 'string' ? req.body.destination.trim() : '';
+  const typeOk = destinationType === 'paypal' || destinationType === 'crypto';
+  if (typeof installId !== 'string' || !installId || installId.length > 64 || !typeOk) { res.status(400).json({ error: 'invalid claim fields' }); return; }
+  if (destinationType === 'paypal') {
+    destination = destination.toLowerCase();
+    if (!EMAIL_RE.test(destination)) { res.status(400).json({ error: 'enter a valid PayPal email address' }); return; }
+  } else if (!EVM_ADDRESS_RE.test(destination)) {
+    res.status(400).json({ error: 'enter a valid wallet address (0x followed by 40 hex characters)' }); return;
+  }
+  try {
+    const claim = await createPayoutClaim(installId, destinationType, destination);
+    res.json({ ok: true, claim });
+  } catch (e) {
+    if (e instanceof PayoutClaimError) { res.status(400).json({ error: e.message }); return; }
+    throw e;
+  }
+}));
+
 app.get('/api/stats', requireAdmin, ah(async (_req, res) => { res.json(await getStats()); }));
 
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -129,6 +158,18 @@ app.post('/api/admin/campaigns/:id/archive', requireAdmin, ah(async (req, res) =
   if (typeof archived !== 'boolean') { res.status(400).json({ error: 'archived (boolean) required' }); return; }
   const ok = await setArchived(req.params.id, archived);
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
+  res.json({ ok: true });
+}));
+
+app.get('/api/admin/claims', requireAdmin, ah(async (_req, res) => { res.json(await listClaims()); }));
+
+app.post('/api/admin/claims/:id/resolve', requireAdmin, ah(async (req, res) => {
+  const status = req.body?.status;
+  if (status !== 'paid' && status !== 'rejected') { res.status(400).json({ error: "status must be 'paid' or 'rejected'" }); return; }
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) { res.status(400).json({ error: 'invalid claim id' }); return; }
+  const ok = await resolveClaim(id, status);
+  if (!ok) { res.status(404).json({ error: 'pending claim not found' }); return; }
   res.json({ ok: true });
 }));
 
