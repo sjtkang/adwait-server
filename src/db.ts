@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { randomUUID } from 'node:crypto';
-import { houseAds, type Ad, type AdFormat } from './ads';
+import { type Ad, type AdFormat } from './ads';
 
 const VIEWABLE_THRESHOLD_MS = 1000;
 const REVENUE_SHARE = 0.5;
@@ -20,7 +20,7 @@ const ELAPSED_SLACK_MS = 2000;         // clock slack for the plausibility check
 export class InvalidServeTokenError extends Error {}
 
 // Minimum cash-out (USD). Env-overridable so you can test with tiny balances.
-const MIN_CASHOUT_USD = Number(process.env.MIN_CASHOUT_USD ?? 10);
+const MIN_CASHOUT_USD = Number(process.env.MIN_CASHOUT_USD ?? 5);
 
 // Thrown when a payout claim is invalid (below minimum, duplicate pending, ...).
 // index.ts maps this to a 400 with the message shown to the user.
@@ -66,16 +66,9 @@ export async function init(): Promise<void> {
     );`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_claims_install ON payout_claims(install_id)`);
 
-  // House ads are BACKFILL: seeded with is_house = true so the selector only
-  // reaches for them when no paid campaign is eligible.
-  for (const ad of houseAds) {
-    await pool.query(
-      `INSERT INTO campaigns (id, format, headline, body, image_url, click_url, impressions_purchased, cpm, is_house)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8, true) ON CONFLICT (id) DO NOTHING`,
-      [ad.id, ad.format, ad.headline, ad.body, ad.imageUrl ?? null, ad.clickUrl, ad.impressionsPurchased, ad.cpm],
-    );
-    await pool.query(`UPDATE campaigns SET cpm = $1, is_house = true WHERE id = $2`, [ad.cpm, ad.id]);
-  }
+  // No seeded house ads: with zero eligible campaigns, /api/ad returns 204 and
+  // the overlay shows its out-of-ads message instead — earnings only ever come
+  // from real campaigns. (is_house stays in the schema for a future backfill tier.)
 }
 
 // Weighted random by CPM (with a floor). Higher-paying ads win proportionally
