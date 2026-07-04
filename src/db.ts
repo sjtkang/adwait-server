@@ -48,11 +48,23 @@ export async function init(): Promise<void> {
       viewable_ms INTEGER NOT NULL, install_id TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );`);
   await pool.query(`ALTER TABLE impressions ADD COLUMN IF NOT EXISTS install_id TEXT`);
+  await pool.query(`ALTER TABLE impressions ADD COLUMN IF NOT EXISTS cpm_at_view DOUBLE PRECISION`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS cpm DOUBLE PRECISION NOT NULL DEFAULT 0`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS is_house BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_ad_id ON impressions(ad_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_install ON impressions(install_id)`);
+
+  // One-time backfill for impressions recorded before the snapshot column
+  // existed: price them at their campaign's CURRENT rate (the best available
+  // approximation); orphans whose campaign is gone price at 0. Runs as a
+  // no-op on every boot after the first.
+  const unpriced = await pool.query(`SELECT DISTINCT ad_id FROM impressions WHERE cpm_at_view IS NULL`);
+  for (const r of unpriced.rows) {
+    const camp = await pool.query(`SELECT cpm FROM campaigns WHERE id = $1`, [r.ad_id]);
+    const rate = (camp.rowCount ?? 0) > 0 ? Number(camp.rows[0].cpm) : 0;
+    await pool.query(`UPDATE impressions SET cpm_at_view = $1 WHERE ad_id = $2 AND cpm_at_view IS NULL`, [rate, r.ad_id]);
+  }
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ad_serves (
       token TEXT PRIMARY KEY, ad_id TEXT NOT NULL, install_id TEXT NOT NULL,
@@ -152,7 +164,13 @@ export async function recordImpression(imp: NewImpression): Promise<void> {
       throw new InvalidServeTokenError('claimed viewable time exceeds time since serve');
     }
 
-    await client.query(`INSERT INTO impressions (ad_id, site, viewable_ms, install_id) VALUES ($1,$2,$3,$4)`, [imp.adId, imp.site, Math.round(imp.viewableMs), imp.installId]);
+    // Snapshot the campaign's rate at billing time: editing a CPM later now
+    // reprices FUTURE views only. A campaign deleted between serve and event
+    // prices this view at 0 (no funding behind it).
+    const campRes = await client.query(`SELECT cpm FROM campaigns WHERE id = $1`, [imp.adId]);
+    const cpmAtView = (campRes.rowCount ?? 0) > 0 ? Number(campRes.rows[0].cpm) : 0;
+
+    await client.query(`INSERT INTO impressions (ad_id, site, viewable_ms, install_id, cpm_at_view) VALUES ($1,$2,$3,$4,$5)`, [imp.adId, imp.site, Math.round(imp.viewableMs), imp.installId, cpmAtView]);
     if (imp.viewableMs >= VIEWABLE_THRESHOLD_MS) {
       await client.query(`UPDATE campaigns SET impressions_served = impressions_served + 1 WHERE id = $1`, [imp.adId]);
     }
@@ -225,10 +243,13 @@ export async function deleteCampaign(id: string): Promise<boolean> {
 }
 
 export async function getEarnings(installId: string) {
+  // Earnings come from the SNAPSHOTTED rate on each impression, not the
+  // campaign's current rate — immune to later CPM edits, and self-contained
+  // (no join), so the ledger even survives campaign deletion.
   const { rows } = await pool.query(
-    `SELECT COUNT(*)::int AS impressions, COALESCE(SUM(c.cpm), 0) AS "cpmSum"
-     FROM impressions i JOIN campaigns c ON c.id = i.ad_id
-     WHERE i.install_id = $1 AND i.viewable_ms >= $2`,
+    `SELECT COUNT(*)::int AS impressions, COALESCE(SUM(cpm_at_view), 0) AS "cpmSum"
+     FROM impressions
+     WHERE install_id = $1 AND viewable_ms >= $2`,
     [installId, VIEWABLE_THRESHOLD_MS],
   );
   const row = rows[0];
@@ -269,8 +290,8 @@ export async function createPayoutClaim(installId: string, destinationType: 'pay
     const recent = await client.query(`SELECT id FROM payout_claims WHERE install_id = $1 AND requested_at > $2`, [installId, new Date(Date.now() - CLAIM_COOLDOWN_MS)]);
     if ((recent.rowCount ?? 0) > 0) throw new PayoutClaimError('please wait a moment between payout requests');
     const earnRes = await client.query(
-      `SELECT COALESCE(SUM(c.cpm), 0) AS "cpmSum" FROM impressions i JOIN campaigns c ON c.id = i.ad_id
-       WHERE i.install_id = $1 AND i.viewable_ms >= $2`,
+      `SELECT COALESCE(SUM(cpm_at_view), 0) AS "cpmSum" FROM impressions
+       WHERE install_id = $1 AND viewable_ms >= $2`,
       [installId, VIEWABLE_THRESHOLD_MS],
     );
     const earned = (Number(earnRes.rows[0].cpmSum) / 1000) * REVENUE_SHARE;
