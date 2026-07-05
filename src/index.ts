@@ -8,6 +8,14 @@ import { uploadAdFile, isAllowedAdMime, storageConfigured, readImageSize, MAX_IM
 
 const PORT = Number(process.env.PORT) || 3000;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? 'changeme-dev-token';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// The admin endpoints control campaigns and payouts, so a guessable token in
+// production is an open cash register. Refuse to boot rather than run exposed.
+if (IS_PRODUCTION && ADMIN_TOKEN === 'changeme-dev-token') {
+  console.error('Refusing to start: ADMIN_TOKEN is unset in production. Set a strong ADMIN_TOKEN env var.');
+  process.exit(1);
+}
 
 const app = express();
 // No CORS on purpose. The extension's background fetches are exempt from CORS
@@ -144,7 +152,7 @@ app.patch('/api/admin/campaigns/:id', requireAdmin, upload.single('image'), ah(a
   if (req.file && rejectIfImageTooLarge(res, req.file.buffer)) return;
   // New file is optional on edit; when present it replaces the stored URL.
   const imageUrl = req.file ? await uploadAdFile(req.file.buffer, req.file.mimetype) : undefined;
-  const ok = await updateCampaign(req.params.id, { headline, body, clickUrl, cpm, imageUrl });
+  const ok = await updateCampaign(String(req.params.id), { headline, body, clickUrl, cpm, imageUrl });
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
   res.json({ ok: true });
 }));
@@ -152,7 +160,7 @@ app.patch('/api/admin/campaigns/:id', requireAdmin, upload.single('image'), ah(a
 app.post('/api/admin/campaigns/:id/topup', requireAdmin, ah(async (req, res) => {
   const amount = Number(req.body?.amount);
   if (!Number.isFinite(amount) || amount < 1) { res.status(400).json({ error: 'amount must be a number >= 1' }); return; }
-  const ok = await addPurchasedImpressions(req.params.id, Math.floor(amount));
+  const ok = await addPurchasedImpressions(String(req.params.id), Math.floor(amount));
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
   res.json({ ok: true });
 }));
@@ -160,7 +168,7 @@ app.post('/api/admin/campaigns/:id/topup', requireAdmin, ah(async (req, res) => 
 app.post('/api/admin/campaigns/:id/archive', requireAdmin, ah(async (req, res) => {
   const archived = req.body?.archived;
   if (typeof archived !== 'boolean') { res.status(400).json({ error: 'archived (boolean) required' }); return; }
-  const ok = await setArchived(req.params.id, archived);
+  const ok = await setArchived(String(req.params.id), archived);
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
   res.json({ ok: true });
 }));
@@ -178,7 +186,7 @@ app.post('/api/admin/claims/:id/resolve', requireAdmin, ah(async (req, res) => {
 }));
 
 app.delete('/api/admin/campaigns/:id', requireAdmin, ah(async (req, res) => {
-  const ok = await deleteCampaign(req.params.id);
+  const ok = await deleteCampaign(String(req.params.id));
   if (!ok) { res.status(404).json({ error: 'campaign not found' }); return; }
   res.json({ ok: true });
 }));
@@ -190,5 +198,13 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 init()
-  .then(() => { app.listen(PORT, () => console.log(`Adwait backend on port ${PORT} — object storage ${storageConfigured() ? 'configured' : 'NOT configured (uploads will fail until S3_* env vars are set)'}`)); })
+  .then(() => {
+    // In production the site is expected to run against Cloudflare R2 (S3 API);
+    // launching without it means every image-campaign upload 500s, so fail fast.
+    if (IS_PRODUCTION && !storageConfigured()) {
+      console.error('Refusing to start: object storage is not configured in production. Set S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_PUBLIC_URL (see LAUNCH.md).');
+      process.exit(1);
+    }
+    app.listen(PORT, () => console.log(`Adwait backend on port ${PORT} — object storage ${storageConfigured() ? 'configured' : 'NOT configured (uploads will fail until S3_* env vars are set)'}`));
+  })
   .catch((e) => { console.error('Database init failed:', e); process.exit(1); });
