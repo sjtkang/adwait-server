@@ -1,303 +1,314 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Adwait — get paid while AI thinks</title>
-  <meta name="description" content="Adwait is a Chrome extension that shows one small, clearly labeled ad while ChatGPT, Claude, Gemini, and six more AI tools write — and pays you 50% of the ad revenue. No account. Cash out from $5." />
-  <meta property="og:title" content="Adwait — get paid while AI thinks" />
-  <meta property="og:description" content="One small, clearly labeled ad while the AI writes. You keep 50% of what the advertiser paid. No account, cash out from $5." />
-  <meta name="theme-color" content="#fbfbf9" />
-  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%231d1d1b"/><circle cx="32" cy="32" r="14" fill="%23187a33"/></svg>' />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --paper: #fbfbf9; --card: #ffffff; --ink: #1d1d1b; --muted: #8b8b84; --faint: #9a9a94;
-      --line: #eaeae6; --green: #187a33; --green-hover: #14672b; --leaf: #57c07a; --amber: #9a6700;
-      --mock: #1d1d1a; --mock-line: #32322c; --mock-dim: #3a3a34;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-    body { margin: 0; background: var(--paper); color: var(--ink);
-           font-family: system-ui, -apple-system, sans-serif; font-size: 16px; line-height: 1.6; }
-    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
-    a { color: var(--green); }
-    :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
-
-    .display { font-family: "Newsreader", Georgia, serif; font-weight: 600; letter-spacing: -0.02em; }
-    .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
-    .num { font-variant-numeric: tabular-nums; }
-
-    /* nav */
-    nav { border-bottom: 1px solid var(--line); background: var(--paper); }
-    .nav-in { display: flex; align-items: center; gap: 26px; padding: 16px 0; }
-    .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 650; font-size: 16px; letter-spacing: -0.2px; color: var(--ink); text-decoration: none; }
-    .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
-    .nav-links { display: flex; gap: 20px; margin-left: auto; }
-    .nav-links a { color: var(--muted); text-decoration: none; font-size: 13.5px; }
-    .nav-links a:hover { color: var(--ink); }
-    .btn { display: inline-block; background: var(--green); color: #fff; text-decoration: none;
-           border-radius: 9px; padding: 9px 16px; font-size: 13.5px; font-weight: 600; border: 0; }
-    .btn:hover { background: var(--green-hover); }
-    .btn.soon { background: #efefec; color: #77776f; cursor: default; }
-    .btn.big { padding: 12px 22px; font-size: 15px; }
-
-    /* hero */
-    .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; padding: 76px 0 72px; }
-    h1 { font-size: clamp(40px, 5.4vw, 58px); line-height: 1.04; margin: 14px 0 18px; }
-    .lede { font-size: 17.5px; color: #55554f; max-width: 46ch; margin: 0 0 22px; }
-    .chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 26px; }
-    .chip { font-size: 12px; font-weight: 600; color: var(--green); background: #e9f3ec;
-            border: 1px solid #cfe5d6; border-radius: 999px; padding: 4px 12px; }
-    .cta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-    .cta-row .quiet { font-size: 14px; }
-
-    /* the signature: live mock of the real product moment */
-    .demo { background: var(--mock); border: 1px solid var(--mock-line); border-radius: 16px;
-            padding: 18px 18px 20px; position: relative; box-shadow: 0 18px 50px rgba(29,29,27,0.18); min-height: 320px; }
-    .demo-top { display: flex; gap: 6px; margin-bottom: 16px; }
-    .demo-top i { width: 9px; height: 9px; border-radius: 50%; background: var(--mock-dim); }
-    .bubble { background: #262621; color: #d6d6cf; border-radius: 10px; padding: 9px 13px;
-              font-size: 12.5px; width: fit-content; max-width: 85%; margin-left: auto; }
-    .gen { margin-top: 18px; }
-    .gen .row { height: 10px; border-radius: 5px; background: var(--mock-dim); margin: 10px 0; overflow: hidden; position: relative; }
-    .gen .row::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent); animation: shimmer 1.6s infinite; }
-    .gen .r1 { width: 92%; } .gen .r2 { width: 78%; } .gen .r3 { width: 55%; }
-    .gen-label { font-size: 11px; color: #77776f; margin-top: 14px; }
-    @keyframes shimmer { to { transform: translateX(100%); } }
-
-    .adcard { position: absolute; right: 16px; bottom: 16px; width: 236px;
-              background: var(--card); color: var(--ink); border: 1px solid #e7e7e2; border-radius: 12px;
-              padding: 28px 14px 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.25); overflow: hidden; }
-    .adcard .lbl { position: absolute; top: 8px; left: 12px; font-size: 8.5px; font-weight: 600;
-                   letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
-    .adcard .earn { position: absolute; top: 7px; right: 12px; font-size: 10.5px; font-weight: 600; color: var(--green); }
-    .adcard .hl { font-size: 13px; font-weight: 600; margin: 0 0 3px; }
-    .adcard .bd { font-size: 11.5px; color: #6b6b66; line-height: 1.45; margin: 0; }
-    .adcard .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #f0f0ec; }
-    .adcard .fill { height: 100%; width: 0%; background: var(--green); }
-    @media (prefers-reduced-motion: reduce) {
-      .gen .row::after { animation: none; }
-      .adcard .fill { width: 100%; }
-    }
-
-    /* sections */
-    section { padding: 64px 0; border-top: 1px solid var(--line); }
-    h2 { font-size: clamp(26px, 3vw, 34px); margin: 10px 0 10px; }
-    .sub { color: #55554f; max-width: 62ch; margin: 0 0 34px; }
-
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
-    .step b { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px;
-              border-radius: 50%; background: var(--green); color: #fff; font-size: 12.5px; margin-bottom: 12px; }
-    .step h3 { font-size: 15.5px; margin: 0 0 6px; }
-    .step p { font-size: 13.5px; color: #55554f; margin: 0; }
-
-    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-    .cols h3 { font-size: 15.5px; margin: 22px 0 6px; }
-    .cols h3:first-of-type { margin-top: 0; }
-    .cols p, .cols li { font-size: 14.5px; color: #45453f; }
-    .cols ul { padding-left: 20px; margin: 8px 0; }
-    .math { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; font-size: 14px; }
-    .math b { color: var(--green); }
-    .more { font-size: 14px; font-weight: 600; }
-
-    details { border-bottom: 1px solid var(--line); }
-    details:first-of-type { border-top: 1px solid var(--line); }
-    summary { cursor: pointer; padding: 17px 4px; font-size: 15.5px; font-weight: 600; list-style: none; display: flex; }
-    summary::-webkit-details-marker { display: none; }
-    summary::after { content: "+"; margin-left: auto; color: var(--muted); font-weight: 500; }
-    details[open] summary::after { content: "\2212"; }
-    details p { margin: 0 4px 18px; font-size: 14.5px; color: #45453f; max-width: 72ch; }
-
-    .adv { background: var(--mock); color: #ececea; border-radius: 18px; padding: 46px 44px;
-           display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 32px; align-items: center; }
-    .adv h2 { color: #fff; margin-top: 8px; }
-    .adv p { color: #b6b6ae; font-size: 15px; max-width: 56ch; }
-    .adv .eyebrow { color: var(--leaf); }
-    .adv .btn { justify-self: start; background: var(--leaf); color: #10240f; }
-    .adv .btn:hover { background: #6fd08f; }
-
-    .final { text-align: center; padding: 78px 0; }
-    .final h2 { font-size: clamp(30px, 4vw, 42px); }
-
-    footer { border-top: 1px solid var(--line); padding: 26px 0 40px; display: flex; gap: 22px; align-items: center;
-             flex-wrap: wrap; font-size: 13px; color: var(--muted); }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--ink); }
-    footer .brand { font-size: 14px; }
-    footer .right { margin-left: auto; }
-
-    @media (max-width: 880px) {
-      .hero { grid-template-columns: 1fr; gap: 40px; padding: 52px 0 56px; }
-      .steps { grid-template-columns: 1fr 1fr; }
-      .cols { grid-template-columns: 1fr; gap: 30px; }
-      .adv { grid-template-columns: 1fr; padding: 34px 26px; }
-      .nav-links { display: none; }
-      .demo { min-height: 300px; }
-    }
-    @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adwait — get paid while AI thinks</title>
+<meta name="description" content="A Chrome extension that shows one small, clearly labeled ad while AI writes — and pays you half of what the advertiser paid.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231d1d1b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%23187a33'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; background: #fbfbf9; }
+  body { margin: 0; background: #fbfbf9; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  ::selection { background: #187a33; color: #fff; }
+  :focus-visible { outline: 2px solid #187a33; outline-offset: 3px; border-radius: 4px; }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  a.navlink { color: #6f6f68; text-decoration: none; font-size: 13.5px; }
+  a.navlink:hover { color: #1d1d1b; }
+  a.btn-green { display: inline-block; background: #187a33; color: #fff; text-decoration: none; border-radius: 10px; font-family: 'Fragment Mono', ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
+  a.btn-green:hover { background: #14672b; }
+  a.link-under { color: #55554f; text-decoration: none; font-size: 14.5px; border-bottom: 1px solid #d9d9d4; }
+  a.link-under:hover { color: #187a33; border-bottom-color: #187a33; }
+  a.link-privacy { color: #187a33; text-decoration: none; border-bottom: 1px solid #cfe5d6; }
+  a.link-privacy:hover { border-bottom-color: #187a33; }
+  a.btn-mint { display: inline-block; background: #57c07a; color: #10240f; text-decoration: none; border-radius: 10px; padding: 16px 28px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; }
+  a.btn-mint:hover { background: #6fd08f; }
+  a.footlink { color: #8b8b84; text-decoration: none; }
+  a.footlink:hover { color: #1d1d1b; }
+  .soon-pill { display: none; background: #efefec; color: #77776f; border-radius: 10px; font-family: 'Fragment Mono', ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
+  body.coming-soon .cta-add { display: none; }
+  body.coming-soon .soon-pill { display: inline-block; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .anim { animation: none !important; }
+  }
+</style>
 </head>
 <body>
+<div style="font-family: system-ui, -apple-system, sans-serif; color: #1d1d1b; background: #fbfbf9; font-size: 16px; line-height: 1.6;">
 
-<nav><div class="wrap nav-in">
-  <a class="brand" href="/"><span class="dot"></span>Adwait</a>
-  <div class="nav-links">
-    <a href="#how">How it works</a><a href="#payments">Payments</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a><a href="#advertisers">Advertisers</a>
-  </div>
-  <a class="btn" data-store href="#how">Add to Chrome</a>
-</div></nav>
-
-<header class="wrap hero">
-  <div>
-    <span class="eyebrow">A Chrome extension</span>
-    <h1 class="display">Get paid while AI&nbsp;thinks.</h1>
-    <p class="lede">AI platforms are starting to show ads. Adwait is the version where the person watching gets paid: one small, clearly labeled ad while ChatGPT, Claude, Gemini, and six more AI tools write — and <strong>50% of what the advertiser paid</strong> goes to you.</p>
-    <div class="chips"><span class="chip">No account</span><span class="chip">50% revenue share</span><span class="chip num">Cash out from $5</span></div>
-    <div class="cta-row">
-      <a class="btn big" data-store href="#how">Add to Chrome — free</a>
-      <a class="quiet" href="/payment-support">How payments work →</a>
+  <!-- ============ NAV ============ -->
+  <nav style="border-bottom: 1px solid #e7e7e2;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; gap: 28px;">
+      <a href="#" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 650; font-size: 16px; letter-spacing: -0.2px; color: #1d1d1b; text-decoration: none;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #187a33;"></span>Adwait
+      </a>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+        <a href="#how" class="navlink">How it works</a>
+        <a href="#math" class="navlink">The math</a>
+        <a href="#advertisers" class="navlink">For advertisers</a>
+      </div>
+      <a href="#how" class="btn-green cta-add" rel="noopener" style="padding: 10px 18px; font-size: 12px; letter-spacing: 0.06em; border-radius: 9px;">Add to Chrome</a>
+      <span class="soon-pill" style="padding: 10px 18px; font-size: 12px; letter-spacing: 0.06em; border-radius: 9px;">Coming soon</span>
     </div>
-  </div>
-  <div class="demo" role="img" aria-label="A chat window generating a response, with the Adwait ad card in the corner counting up earnings.">
-    <div class="demo-top"><i></i><i></i><i></i></div>
-    <div class="bubble">Summarize this 40-page report and draft an email to the team.</div>
-    <div class="gen"><div class="row r1"></div><div class="row r2"></div><div class="row r3"></div></div>
-    <div class="gen-label num">Generating…</div>
-    <div class="adcard">
-      <span class="lbl">Ad · Adwait</span>
-      <span class="earn num" id="demo-earn">+ $0.0000</span>
-      <p class="hl">Postgres that scales to zero</p>
-      <p class="bd">Serverless databases for side projects. Free tier included.</p>
-      <div class="bar"><div class="fill" id="demo-fill"></div></div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <header style="border-bottom: 1px solid #e7e7e2;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 72px 32px 64px;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">A Chrome extension</div>
+      <h1 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(54px, 8vw, 104px); line-height: 0.98; letter-spacing: -0.03em; margin: 22px 0 26px; max-width: 12ch; text-wrap: balance;">Get paid while AI <em style="font-style: italic;">thinks.</em></h1>
+      <p style="font-size: 18.5px; line-height: 1.55; color: #55554f; max-width: 56ch; margin: 0 0 32px;">Ads are coming to AI either way — OpenAI already runs them in ChatGPT and keeps every cent. Adwait shows one small, clearly labeled ad while the model writes, and pays you <strong style="color: #1d1d1b;">half of what the advertiser paid.</strong></p>
+      <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-bottom: 44px;">
+        <a href="#how" class="btn-green cta-add" rel="noopener" style="padding: 16px 28px; font-size: 13px;">Add to Chrome — free</a>
+        <span class="soon-pill" style="padding: 16px 28px; font-size: 13px; border-radius: 10px;">Coming soon to the Chrome Web Store</span>
+        <a href="#math" class="link-under">See the math ↓</a>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-top: 1px solid #e7e7e2; border-bottom: 1px solid #e7e7e2; padding: 16px 2px; margin-bottom: 52px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #1d1d1b;">
+        <span>No account</span>
+        <span>50% revenue share</span>
+        <span>Cash out from $5</span>
+        <span style="color: #9a9a94;">Free forever</span>
+      </div>
+
+      <!-- The product moment: dark chat panel with the real ad card -->
+      <div role="img" aria-label="A chat window generating a response, with the Adwait ad card counting up earnings in the corner." style="position: relative; background: #161614; border: 1px solid #2c2c28; border-radius: 18px; padding: 22px 24px 24px; box-shadow: 0 24px 70px rgba(29, 29, 27, 0.22); overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: #34342e;"></span>
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: #34342e;"></span>
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: #34342e;"></span>
+          <span style="margin-left: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #77776f;">chatgpt.com</span>
+        </div>
+        <div style="max-width: 680px; margin: 38px auto 0; padding-bottom: 150px;">
+          <div style="background: #262621; color: #d6d6cf; border-radius: 10px; padding: 10px 14px; font-size: 13.5px; width: fit-content; max-width: 85%; margin-left: auto;">Draft the launch plan, then rewrite it for the exec review.</div>
+          <div style="margin-top: 30px; color: #d6d6cf; font-size: 13.5px; line-height: 1.6;">Here's the launch plan, structured in three phases —</div>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+            <div class="anim" style="height: 11px; border-radius: 6px; width: 92%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear;"></div>
+            <div class="anim" style="height: 11px; border-radius: 6px; width: 78%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.12s;"></div>
+            <div class="anim" style="height: 11px; border-radius: 6px; width: 55%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.24s;"></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 26px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid #3a3a34; border-radius: 50%;">
+              <span style="width: 9px; height: 9px; background: #d6d6cf; border-radius: 2px;"></span>
+            </span>
+            <span class="anim" style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; color: #77776f; animation: pulse 1.8s infinite;">Generating…</span>
+          </div>
+        </div>
+        <!-- The real overlay, faithfully -->
+        <div style="position: absolute; right: 20px; bottom: 20px; width: 300px; box-sizing: border-box; background: #ffffff; color: #1d1d1b; border: 1px solid #e7e7e2; border-radius: 12px; padding: 30px 16px 16px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); overflow: hidden;">
+          <span style="position: absolute; top: 9px; left: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a94;">Ad · Adwait</span>
+          <span id="demo-earn" style="position: absolute; top: 8px; right: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #187a33;">+ $0.0000</span>
+          <div style="font-size: 14px; font-weight: 600; letter-spacing: -0.1px; margin-bottom: 4px;">Postgres that scales to zero</div>
+          <div style="font-size: 13px; color: #6b6b66; line-height: 1.45;">Serverless databases for side projects. Free tier included.</div>
+          <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #f0f0ec;">
+            <div id="demo-fill" style="height: 100%; width: 0%; background: #187a33;"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 16px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">The only moment Adwait exists — while the model writes. Response ends, ad vanishes.</div>
+
+      <div style="margin-top: 44px; border-top: 1px solid #e7e7e2; padding-top: 18px; display: flex; flex-wrap: wrap; column-gap: 22px; row-gap: 8px; align-items: baseline; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px;">
+        <span style="color: #9a9a94; letter-spacing: 0.1em; text-transform: uppercase;">Works on</span>
+        <span style="color: #55554f;">ChatGPT</span>
+        <span style="color: #55554f;">Claude</span>
+        <span style="color: #55554f;">Gemini</span>
+        <span style="color: #55554f;">Perplexity</span>
+        <span style="color: #55554f;">Grok</span>
+        <span style="color: #55554f;">DeepSeek</span>
+        <span style="color: #55554f;">Copilot</span>
+        <span style="color: #55554f;">Replit</span>
+        <span style="color: #55554f;">Base44</span>
+        <span style="color: #9a9a94;">— each with its own off switch</span>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<section id="how"><div class="wrap">
-  <span class="eyebrow">How it works</span>
-  <h2 class="display">Four steps, no strings.</h2>
-  <p class="sub">The ad only exists while the AI is writing. The moment the response finishes, it disappears.</p>
-  <div class="steps">
-    <div class="step"><b>1</b><h3>Install</h3><p>No account, no sign-up, no email. A random ID in your browser is all Adwait ever uses.</p></div>
-    <div class="step"><b>2</b><h3>Use AI normally</h3><p>Your AI tools work exactly as before — nine supported sites, each with its own on/off switch.</p></div>
-    <div class="step"><b>3</b><h3>An ad appears — briefly</h3><p>While a response generates, a small card labeled “Ad · Adwait” sits in a corner you choose, then vanishes.</p></div>
-    <div class="step"><b>4</b><h3>You earn, live</h3><p>Every ad genuinely on screen for a second earns half of what the advertiser paid. Watch the counter tick.</p></div>
-  </div>
-</div></section>
-
-<section id="payments"><div class="wrap">
-  <span class="eyebrow">Payments</span>
-  <h2 class="display">Where the money comes from.</h2>
-  <div class="cols">
-    <div>
-      <h3>The math, in the open</h3>
-      <p class="math num">Advertisers pay per 1,000 viewed ads (a “CPM”). You keep half. A <b>$4 CPM</b> campaign pays you <b>$0.002 per view</b> — small on its own, and it adds up quietly while you do what you were doing anyway.</p>
-      <h3>Honest numbers</h3>
-      <p>Your balance is an estimate until it’s reconciled against advertiser-verified counts — that’s why payouts have a review window instead of being instant. If no campaign is live, the card says so and nothing accrues. Earnings only ever come from real, paid campaigns.</p>
+  <!-- ============ HOW IT WORKS ============ -->
+  <section id="how">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 92px 32px;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">How it works</div>
+      <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 14px 0 48px;">Three steps. No strings.</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px;">
+        <div style="border-top: 1px solid #1d1d1b; padding-top: 18px;">
+          <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #187a33; margin-bottom: 12px;">01</div>
+          <h3 style="font-size: 17px; font-weight: 650; margin: 0 0 8px;">Install</h3>
+          <p style="font-size: 15px; color: #55554f; margin: 0; line-height: 1.6;">No account, no email, no sign-up. A random key in your browser is the whole identity.</p>
+        </div>
+        <div style="border-top: 1px solid #1d1d1b; padding-top: 18px;">
+          <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #187a33; margin-bottom: 12px;">02</div>
+          <h3 style="font-size: 17px; font-weight: 650; margin: 0 0 8px;">Use AI like always</h3>
+          <p style="font-size: 15px; color: #55554f; margin: 0; line-height: 1.6;">Nine supported sites, untouched. Your chats are never read — Adwait only notices the page's own stop button.</p>
+        </div>
+        <div style="border-top: 1px solid #1d1d1b; padding-top: 18px;">
+          <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #187a33; margin-bottom: 12px;">03</div>
+          <h3 style="font-size: 17px; font-weight: 650; margin: 0 0 8px;">Earn while it writes</h3>
+          <p style="font-size: 15px; color: #55554f; margin: 0; line-height: 1.6;">One labeled card in the corner you choose. On screen for a second — you're paid. Response ends, card gone.</p>
+        </div>
+      </div>
     </div>
-    <div>
-      <h3>Cashing out</h3>
-      <ul>
-        <li class="num">From <strong>$5</strong>, straight from the extension popup.</li>
-        <li>PayPal email or USDC (Base / Polygon) — you choose at cash-out, and that’s the only moment any contact detail is asked for.</li>
-        <li class="num">Requests are reviewed and paid within about 30 days. Fees may apply depending on the method.</li>
-        <li>Your anonymous <strong>earnings key</strong> restores your balance on a new install — still no account.</li>
-      </ul>
-      <p class="more"><a href="/payment-support">Read the full payments guide →</a></p>
+  </section>
+
+  <!-- ============ THE MATH ============ -->
+  <section id="math" style="background: #161614; color: #ececea;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 100px 32px;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #57c07a;">The math, in the open</div>
+      <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 14px 0 48px; color: #ffffff;">You keep half. Always.</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 56px; align-items: start;">
+
+        <div style="background: #1d1d1a; border: 1px solid #2c2c28; border-radius: 14px; padding: 10px 26px 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 15px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Advertiser pays</span>
+            <span style="color: #ececea;"><span id="ledger-cpm" style="color: #57c07a;">$20.00</span> / 1,000 views</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 15px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Your share</span>
+            <span style="color: #57c07a;">50%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 15px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">One viewed ad</span>
+            <span id="ledger-view" style="color: #57c07a;">$0.0100</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 15px 0; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Heavy month, ~40 ads/day</span>
+            <span style="color: #ececea;"><span id="ledger-month" style="color: #57c07a;">$12.00</span> / mo</span>
+          </div>
+          <div style="margin-top: 14px; padding-top: 16px; border-top: 1px solid #2c2c28; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; line-height: 1.7; color: #8f8f88;">REVENUE_SHARE = 0.5 — a constant in the code, not a promise on a slide.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 28px;">
+          <div>
+            <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8f88; margin-bottom: 10px;">Ads on AI today</div>
+            <div style="height: 46px; border: 1px solid #2c2c28; border-radius: 8px; background: #22221f; display: flex; align-items: center; justify-content: center;">
+              <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #77776f; letter-spacing: 0.06em;">PLATFORM KEEPS 100% — YOU GET $0</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8f88; margin-bottom: 10px;">Adwait</div>
+            <div style="height: 46px; border: 1px solid #2c2c28; border-radius: 8px; overflow: hidden; display: flex;">
+              <div style="width: 50%; background: #187a33; display: flex; align-items: center; justify-content: center;">
+                <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #ffffff; letter-spacing: 0.06em;">YOU — 50%</span>
+              </div>
+              <div style="width: 50%; background: #22221f; display: flex; align-items: center; justify-content: center;">
+                <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #77776f; letter-spacing: 0.06em;">ADWAIT — 50%</span>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 15px; line-height: 1.7; color: #a3a39b; margin: 0;">A heavy user makes a few dollars a month — pocket money for time you were already spending, not an income program. We won't pretend otherwise. Balances are estimates until reconciled against advertiser-verified counts; cash out from <strong style="color: #ececea;">$5</strong> by PayPal or USDC, reviewed within ~30 days. No campaign live? The card says so, and nothing accrues.</p>
+        </div>
+      </div>
     </div>
-  </div>
-</div></section>
+  </section>
 
-<section id="privacy"><div class="wrap">
-  <span class="eyebrow">Privacy</span>
-  <h2 class="display">What we don’t collect.</h2>
-  <div class="cols">
-    <div>
-      <ul>
-        <li><strong>Your conversations.</strong> Adwait never reads, stores, or transmits your prompts or the AI’s responses — it only checks whether the page’s own “stop generating” control is visible.</li>
-        <li><strong>Your identity.</strong> No name, no email, no sign-in. A random install ID is all that exists — until you cash out, when you type only a payout destination.</li>
-        <li><strong>Your browsing.</strong> The extension runs on nine supported AI sites and nowhere else, and you can switch each one off.</li>
-      </ul>
+  <!-- ============ PRIVACY ============ -->
+  <section id="privacy">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 92px 32px;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33; margin-bottom: 10px;">What we don't do</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px 48px; border-top: 1px solid #e7e7e2; padding: 34px 0; align-items: center;">
+        <h3 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(30px, 3.6vw, 42px); line-height: 1.05; letter-spacing: -0.02em; margin: 0;">We never read your chats.</h3>
+        <p style="font-size: 15.5px; color: #55554f; margin: 0; line-height: 1.65;">Detection is the page's own stop-generating button — an element on the page, not your words. Prompts and responses are never read, stored, or transmitted.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px 48px; border-top: 1px solid #e7e7e2; padding: 34px 0; align-items: center;">
+        <h3 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(30px, 3.6vw, 42px); line-height: 1.05; letter-spacing: -0.02em; margin: 0;">No account. Ever.</h3>
+        <p style="font-size: 15.5px; color: #55554f; margin: 0; line-height: 1.65;">You install and earn against a random key in your browser. A payout destination at cash-out is the only detail ever asked for — and only then.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px 48px; border-top: 1px solid #e7e7e2; border-bottom: 1px solid #e7e7e2; padding: 34px 0; align-items: center;">
+        <h3 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(30px, 3.6vw, 42px); line-height: 1.05; letter-spacing: -0.02em; margin: 0;">Out of ads? It says so.</h3>
+        <p style="font-size: 15.5px; color: #55554f; margin: 0; line-height: 1.65;">No funded campaign means no accrual and no fake numbers. Your balance only ever grows from real, paid campaigns.</p>
+      </div>
+      <div style="margin-top: 22px; font-size: 14px;"><a href="/privacy" class="link-privacy">Read the full privacy policy →</a></div>
     </div>
-    <div>
-      <ul>
-        <li><strong>Per ad, three things are recorded:</strong> which ad, which supported site, and how long it was actually on screen.</li>
-        <li><strong>No cookies. No ad clicks tracked.</strong> Clicking an ad simply opens the advertiser’s site.</li>
-        <li><strong>Uninstall ends everything</strong> — local data is deleted and collection stops immediately.</li>
-      </ul>
-      <p class="more"><a href="/privacy">Read the full privacy policy →</a></p>
+  </section>
+
+  <!-- ============ ADVERTISERS ============ -->
+  <section id="advertisers" style="background: #161614; color: #ececea;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 96px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: center;">
+      <div>
+        <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #57c07a;">For advertisers</div>
+        <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 14px 0 18px; color: #ffffff; max-width: 16ch;">Buy the moment they can't look away.</h2>
+        <p style="font-size: 15.5px; line-height: 1.7; color: #a3a39b; margin: 0; max-width: 56ch;">One clearly labeled card in front of developers, builders, and writers — during the seconds they're locked on a generating response. Billed on viewable impressions only: ≥1s on screen, ≥50% visible, active tab. Verify with your own measurement. Pilots from $250.</p>
+      </div>
+      <div style="justify-self: start;">
+        <a href="/cdn-cgi/l/email-protection#4f3c3a3f3f203d3b0f2e2b382e263b612620703c3a2d252a2c3b720e2b392a3d3b263c2621286a7d7f20216a7d7f0e2b382e263b" class="btn-mint"><span class="__cf_email__" data-cfemail="e4979194948b9690a4858093858d90ca8d8b">[email&#160;protected]</span></a>
+      </div>
     </div>
-  </div>
-</div></section>
+  </section>
 
-<section id="faq"><div class="wrap">
-  <span class="eyebrow">FAQ</span>
-  <h2 class="display">Fair questions.</h2>
-  <details><summary>How much will I actually earn?</summary><p class="num">It depends on how much you use AI and which campaigns are live. As a shape: a heavy user seeing ~40 ads a day at a $4 CPM earns about $2.40 a month; premium campaigns pay more. This is pocket money for time you were already spending — not an income program, and we won’t pretend otherwise.</p></details>
-  <details><summary>Do you read my chats?</summary><p>No. Detection works by noticing the page’s own stop-generating button — an element on the page, not your words. Conversation text is never read or transmitted, and the privacy policy is written to be checkable against exactly that behavior.</p></details>
-  <details><summary>Which sites are supported?</summary><p>ChatGPT, Claude (including Claude Code and Claude Design on the web), Gemini, Perplexity, Grok, DeepSeek, Microsoft Copilot, Replit, and Base44 — nine sites, each with its own on/off switch. More AI surfaces, especially long-running agents, are on the roadmap.</p></details>
-  <details><summary>What if there are no ads to show?</summary><p>The card says “Out of ads right now” and nothing is recorded or credited. Your balance only grows from real, funded campaigns.</p></details>
-  <details><summary>How do payouts work?</summary><p class="num">From $5, request a payout in the popup with a PayPal email or a USDC address (Base or Polygon). Requests are reviewed against advertiser-verified counts and paid within about 30 days; provider or network fees may apply. Multiple requests can be in review at once.</p></details>
-  <details><summary>What’s the earnings key?</summary><p>Your balance lives against a random key in your browser instead of an account. Copy it from the popup and keep it somewhere safe: pasting it into a fresh install restores your balance on a new machine. Treat it like a password — anyone holding it can cash out that balance.</p></details>
-</div></section>
+  <!-- ============ FINAL CTA ============ -->
+  <section>
+    <div style="max-width: 1120px; margin: 0 auto; padding: 110px 32px; text-align: center;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">Ready when you are</div>
+      <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(38px, 5.5vw, 68px); line-height: 1.02; letter-spacing: -0.025em; margin: 18px auto 16px; max-width: 18ch; text-wrap: balance;">The wait was always worth <em style="font-style: italic;">something.</em></h2>
+      <p style="font-size: 16.5px; color: #55554f; margin: 0 auto 32px; max-width: 44ch;">Install once. Use AI like you always do. Cash out when it adds up.</p>
+      <div style="display: flex; justify-content: center;">
+        <a href="#how" class="btn-green cta-add" rel="noopener" style="padding: 17px 32px; font-size: 13.5px;">Add to Chrome — free</a>
+        <span class="soon-pill" style="padding: 17px 32px; font-size: 13.5px; border-radius: 10px;">Coming soon to the Chrome Web Store</span>
+      </div>
+    </div>
+  </section>
 
-<section id="advertisers"><div class="wrap adv">
-  <div>
-    <span class="eyebrow">For advertisers</span>
-    <h2 class="display">Reach people at the exact moment they’re watching.</h2>
-    <p>Adwait places one clearly labeled ad in front of AI power users — developers, builders, writers — during the seconds they’re staring at a generating response. Billing counts only viewable impressions (≥1s on screen, active tab), verified against your own measurement. Pilot campaigns start at $250.</p>
-  </div>
-  <a class="btn" href="mailto:support@adwait.io?subject=Advertising%20on%20Adwait">Talk to us — support@adwait.io</a>
-</div></section>
+  <!-- ============ FOOTER ============ -->
+  <footer style="border-top: 1px solid #e7e7e2;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 28px 32px 44px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84;">
+      <a href="#" style="display: inline-flex; align-items: center; gap: 7px; font-family: system-ui, -apple-system, sans-serif; font-weight: 650; font-size: 14px; color: #1d1d1b; text-decoration: none;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #187a33;"></span>Adwait
+      </a>
+      <a href="/privacy" class="footlink">Privacy</a>
+      <a href="/payment-support" class="footlink">How payments work</a>
+      <a href="/cdn-cgi/l/email-protection#03707673736c717743626774626a772d6a6c" class="footlink"><span class="__cf_email__" data-cfemail="5c2f292c2c332e281c3d382b3d3528723533">[email&#160;protected]</span></a>
+      <span style="margin-left: auto;">© 2026 Adwait</span>
+    </div>
+  </footer>
 
-<div class="wrap final">
-  <span class="eyebrow">Ready when you are</span>
-  <h2 class="display">The wait was always worth something.</h2>
-  <p class="sub" style="margin:10px auto 26px; max-width:52ch;">Install once. Use AI like you always do. Cash out when it adds up.</p>
-  <a class="btn big" data-store href="#how">Add to Chrome — free</a>
 </div>
 
-<footer><div class="wrap" style="display:flex; gap:22px; align-items:center; flex-wrap:wrap;">
-  <a class="brand" href="/"><span class="dot"></span>Adwait</a>
-  <a href="/privacy">Privacy</a>
-  <a href="/payment-support">How payments work</a>
-  <a href="mailto:support@adwait.io">support@adwait.io</a>
-  <span class="right num">© 2026 Adwait</span>
-</div></footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function () {
+  // ===== Edit these three constants =====
+  var STORE_URL = "";        // Paste your Chrome Web Store listing URL when live. Empty → CTAs scroll to #how.
+  var COMING_SOON = false;   // true → CTAs become "Coming soon" pills.
+  var DEMO_CPM = 20;         // $ per 1,000 viewed ads, drives the demo counter + ledger numbers.
+  // ======================================
 
-<script>
-  // ── Chrome Web Store link ──────────────────────────────────────────────
-  // Paste the extension's store URL between the quotes once it's approved.
-  // While empty, install buttons show "Coming soon" and scroll to How it works.
-  const STORE_URL = "";
-  // ───────────────────────────────────────────────────────────────────────
-  for (const a of document.querySelectorAll('[data-store]')) {
-    if (STORE_URL) { a.href = STORE_URL; a.target = '_blank'; a.rel = 'noopener'; }
-    else { a.textContent = 'Coming soon to the Chrome Web Store'; a.classList.add('soon'); }
+  if (COMING_SOON) document.body.classList.add('coming-soon');
+  if (STORE_URL) {
+    document.querySelectorAll('.cta-add').forEach(function (a) {
+      a.href = STORE_URL;
+      a.target = '_blank';
+    });
   }
 
-  // Demo loop: counter and bar mirror the real overlay (a $4 CPM ad → $0.0020).
-  const earn = document.getElementById('demo-earn');
-  const fill = document.getElementById('demo-fill');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) { earn.textContent = '+ $0.0020'; }
-  else {
-    const CYCLE = 4200, PAUSE = 900, TARGET = 0.002;
-    let start = performance.now();
-    (function tick(now) {
-      const t = now - start;
-      if (t >= CYCLE + PAUSE) start = now;
-      const p = Math.min(1, t / CYCLE);
-      earn.textContent = '+ $' + (TARGET * p).toFixed(4);
-      fill.style.width = (p * 100) + '%';
-      requestAnimationFrame(tick);
-    })(start);
+  var perView = DEMO_CPM / 2000;
+  var cpmEl = document.getElementById('ledger-cpm');
+  var viewEl = document.getElementById('ledger-view');
+  var monthEl = document.getElementById('ledger-month');
+  if (cpmEl) cpmEl.textContent = '$' + DEMO_CPM.toFixed(2);
+  if (viewEl) viewEl.textContent = '$' + perView.toFixed(4);
+  if (monthEl) monthEl.textContent = '$' + (perView * 40 * 30).toFixed(2);
+
+  var earnEl = document.getElementById('demo-earn');
+  var fillEl = document.getElementById('demo-fill');
+  if (!earnEl || !fillEl) return;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    earnEl.textContent = '+ $' + perView.toFixed(4);
+    fillEl.style.width = '100%';
+    return;
   }
+  var CYCLE = 4200, PAUSE = 900;
+  var start = performance.now();
+  function tick(now) {
+    if (now - start >= CYCLE + PAUSE) start = now;
+    var p = Math.min(1, (now - start) / CYCLE);
+    earnEl.textContent = '+ $' + (perView * p).toFixed(4);
+    fillEl.style.width = (p * 100) + '%';
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>
