@@ -31,9 +31,14 @@
   .soon-pill { display: none; background: #efefec; color: #77776f; border-radius: 10px; font-family: 'Fragment Mono', ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
   body.coming-soon .cta-add { display: none; }
   body.coming-soon .soon-pill { display: inline-block; }
+  .marquee-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+  .marquee { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+  .marquee-wrap:hover .marquee { animation-play-state: paused; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .anim { animation: none !important; }
+    .marquee { animation: none !important; }
   }
 </style>
 </head>
@@ -44,7 +49,7 @@
   <nav style="border-bottom: 1px solid #e7e7e2;">
     <div style="max-width: 1120px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; gap: 28px;">
       <a href="#" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 650; font-size: 16px; letter-spacing: -0.2px; color: #1d1d1b; text-decoration: none;">
-        <span style="width: 9px; height: 9px; border-radius: 50%; background: #187a33;"></span>Adwait
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #187a33;"></span>AdWait
       </a>
       <div style="margin-left: auto; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
         <a href="#how" class="navlink">How it works</a>
@@ -58,71 +63,98 @@
 
   <!-- ============ HERO ============ -->
   <header style="border-bottom: 1px solid #e7e7e2;">
-    <div style="max-width: 1120px; margin: 0 auto; padding: 72px 32px 64px;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 64px 32px 56px;">
+      <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center; margin-bottom: 48px;">
+      <div style="flex: 1 1 360px; min-width: 280px;">
       <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">A Chrome extension</div>
-      <h1 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(54px, 8vw, 104px); line-height: 0.98; letter-spacing: -0.03em; margin: 22px 0 26px; max-width: 12ch; text-wrap: balance;">Get paid while AI <em style="font-style: italic;">thinks.</em></h1>
-      <p style="font-size: 18.5px; line-height: 1.55; color: #55554f; max-width: 56ch; margin: 0 0 32px;">Ads are coming to AI either way — OpenAI already runs them in ChatGPT and keeps every cent. Adwait shows one small, clearly labeled ad while the model writes, and pays you <strong style="color: #1d1d1b;">half of what the advertiser paid.</strong></p>
-      <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-bottom: 44px;">
+      <h1 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(42px, 4.8vw, 72px); line-height: 1.0; letter-spacing: -0.03em; margin: 22px 0 26px; max-width: 12ch; text-wrap: balance;">Get paid while AI <em style="font-style: italic;">thinks.</em></h1>
+      <p style="font-size: 18.5px; line-height: 1.55; color: #55554f; max-width: 56ch; margin: 0 0 32px;">Ads are coming to AI either way — so why not get paid for yours? Adwait shows one small, clearly labeled ad while the model generates, and puts the <b>earnings right into your wallet.</b><br></p>
+      <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
         <a href="#how" class="btn-green cta-add" rel="noopener" style="padding: 16px 28px; font-size: 13px;">Add to Chrome — free</a>
         <span class="soon-pill" style="padding: 16px 28px; font-size: 13px; border-radius: 10px;">Coming soon to the Chrome Web Store</span>
         <a href="#math" class="link-under">See the math ↓</a>
       </div>
-
-      <div style="display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-top: 1px solid #e7e7e2; border-bottom: 1px solid #e7e7e2; padding: 16px 2px; margin-bottom: 52px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #1d1d1b;">
-        <span>No account</span>
-        <span>50% revenue share</span>
-        <span>Cash out from $5</span>
-        <span style="color: #9a9a94;">Free forever</span>
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 24px;">
+        <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">Cash out from $5</span>
+        <span style="display: inline-flex; align-items: center; gap: 9px; border: 1px solid #e7e7e2; background: #ffffff; border-radius: 9px; padding: 9px 15px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/paypal.svg" alt="" width="15" height="15" style="display: block;">PayPal</span>
+        <span style="display: inline-flex; align-items: center; gap: 9px; border: 1px solid #e7e7e2; background: #ffffff; border-radius: 9px; padding: 9px 15px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/usdc.svg" alt="" width="15" height="15" style="display: block;">USDC</span>
+        <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #9a9a94;">your choice</span>
+      </div>
       </div>
 
       <!-- The product moment: dark chat panel with the real ad card -->
-      <div role="img" aria-label="A chat window generating a response, with the Adwait ad card counting up earnings in the corner." style="position: relative; background: #161614; border: 1px solid #2c2c28; border-radius: 18px; padding: 22px 24px 24px; box-shadow: 0 24px 70px rgba(29, 29, 27, 0.22); overflow: hidden;">
+      <div style="flex: 1 1 300px; min-width: 280px; max-width: 560px;">
+      <div role="img" aria-label="A chat window generating a response, with the Adwait ad card counting up earnings in the corner." style="position: relative; background: #161614; border: 1px solid #2c2c28; border-radius: 14px; padding: 16px 18px 18px; box-shadow: 0 24px 70px rgba(29, 29, 27, 0.22); overflow: hidden;">
         <div style="display: flex; align-items: center; gap: 7px;">
           <span style="width: 9px; height: 9px; border-radius: 50%; background: #34342e;"></span>
           <span style="width: 9px; height: 9px; border-radius: 50%; background: #34342e;"></span>
           <span style="width: 9px; height: 9px; border-radius: 50%; background: #34342e;"></span>
-          <span style="margin-left: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #77776f;">chatgpt.com</span>
+          <span style="margin-left: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; color: #77776f;">chatgpt.com</span>
         </div>
-        <div style="max-width: 680px; margin: 38px auto 0; padding-bottom: 150px;">
-          <div style="background: #262621; color: #d6d6cf; border-radius: 10px; padding: 10px 14px; font-size: 13.5px; width: fit-content; max-width: 85%; margin-left: auto;">Draft the launch plan, then rewrite it for the exec review.</div>
-          <div style="margin-top: 30px; color: #d6d6cf; font-size: 13.5px; line-height: 1.6;">Here's the launch plan, structured in three phases —</div>
-          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
-            <div class="anim" style="height: 11px; border-radius: 6px; width: 92%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear;"></div>
-            <div class="anim" style="height: 11px; border-radius: 6px; width: 78%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.12s;"></div>
-            <div class="anim" style="height: 11px; border-radius: 6px; width: 55%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.24s;"></div>
+        <div style="margin: 22px 0 0; padding-bottom: 130px;">
+          <div style="background: #262621; color: #d6d6cf; border-radius: 10px; padding: 8px 12px; font-size: 12.5px; width: fit-content; max-width: 85%; margin-left: auto;">Draft the launch plan, then rewrite it for the exec review.</div>
+          <div style="margin-top: 22px; color: #d6d6cf; font-size: 12.5px; line-height: 1.6;">Here's the launch plan, structured in three phases —</div>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+            <div class="anim" style="height: 9px; border-radius: 6px; width: 92%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear;"></div>
+            <div class="anim" style="height: 9px; border-radius: 6px; width: 78%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.12s;"></div>
+            <div class="anim" style="height: 9px; border-radius: 6px; width: 55%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.24s;"></div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; margin-top: 26px;">
-            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid #3a3a34; border-radius: 50%;">
-              <span style="width: 9px; height: 9px; background: #d6d6cf; border-radius: 2px;"></span>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid #3a3a34; border-radius: 50%;">
+              <span style="width: 8px; height: 8px; background: #d6d6cf; border-radius: 2px;"></span>
             </span>
             <span class="anim" style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; color: #77776f; animation: pulse 1.8s infinite;">Generating…</span>
           </div>
         </div>
         <!-- The real overlay, faithfully -->
-        <div style="position: absolute; right: 20px; bottom: 20px; width: 300px; box-sizing: border-box; background: #ffffff; color: #1d1d1b; border: 1px solid #e7e7e2; border-radius: 12px; padding: 30px 16px 16px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); overflow: hidden;">
-          <span style="position: absolute; top: 9px; left: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a94;">Ad · Adwait</span>
-          <span id="demo-earn" style="position: absolute; top: 8px; right: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #187a33;">+ $0.0000</span>
-          <div style="font-size: 14px; font-weight: 600; letter-spacing: -0.1px; margin-bottom: 4px;">Postgres that scales to zero</div>
-          <div style="font-size: 13px; color: #6b6b66; line-height: 1.45;">Serverless databases for side projects. Free tier included.</div>
+        <div style="position: absolute; right: 14px; bottom: 14px; width: 248px; box-sizing: border-box; background: #ffffff; color: #1d1d1b; border: 1px solid #e7e7e2; border-radius: 10px; padding: 26px 13px 13px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); overflow: hidden;">
+          <span style="position: absolute; top: 8px; left: 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a94;">Ad · Adwait</span>
+          <span id="demo-earn" style="position: absolute; top: 7px; right: 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; color: #187a33;">+ $0.0000</span>
+          <div style="font-size: 12.5px; font-weight: 600; letter-spacing: -0.1px; margin-bottom: 3px;">AdWait - this ad is paying you.</div>
+          <div style="font-size: 11.5px; color: #6b6b66; line-height: 1.45;">AdWait credits you 50% of the ad revenue for every ad you actually see.<br></div>
           <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #f0f0ec;">
             <div id="demo-fill" style="height: 100%; width: 0%; background: #187a33;"></div>
           </div>
         </div>
       </div>
-      <div style="margin-top: 16px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">The only moment Adwait exists — while the model writes. Response ends, ad vanishes.</div>
+      <div style="margin-top: 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94; line-height: 1.6;">The only moment Adwait exists — while the model writes. Response ends, ad vanishes.</div>
+      </div>
+      </div>
 
-      <div style="margin-top: 44px; border-top: 1px solid #e7e7e2; padding-top: 18px; display: flex; flex-wrap: wrap; column-gap: 22px; row-gap: 8px; align-items: baseline; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px;">
-        <span style="color: #9a9a94; letter-spacing: 0.1em; text-transform: uppercase;">Works on</span>
-        <span style="color: #55554f;">ChatGPT</span>
-        <span style="color: #55554f;">Claude</span>
-        <span style="color: #55554f;">Gemini</span>
-        <span style="color: #55554f;">Perplexity</span>
-        <span style="color: #55554f;">Grok</span>
-        <span style="color: #55554f;">DeepSeek</span>
-        <span style="color: #55554f;">Copilot</span>
-        <span style="color: #55554f;">Replit</span>
-        <span style="color: #55554f;">Base44</span>
-        <span style="color: #9a9a94;">— each with its own off switch</span>
+      <div style="display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-top: 1px solid #e7e7e2; border-bottom: 1px solid #e7e7e2; padding: 16px 2px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #1d1d1b;">
+        <span>No account</span>
+        <span>50% revenue share</span>
+        <span>Clearly labeled ads</span>
+        <span style="color: #9a9a94;">Free forever</span>
+      </div>
+
+      <div style="margin-top: 26px;">
+        <div style="display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; margin-bottom: 16px;">
+          <span style="color: #9a9a94; letter-spacing: 0.1em; text-transform: uppercase;">Works on</span>
+          <span style="color: #9a9a94;">— each with its own off switch</span>
+        </div>
+        <div class="marquee-wrap">
+          <div class="marquee">
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 6px;">GPT</span>ChatGPT</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 8px;">G</span>Grok</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 8px;">44</span>Base44</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 6px;">GPT</span>ChatGPT</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 8px;">G</span>Grok</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 9px; margin-right: 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; white-space: nowrap;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 8px;">44</span>Base44</span>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -198,6 +230,12 @@
             </div>
           </div>
           <p style="font-size: 15px; line-height: 1.7; color: #a3a39b; margin: 0;">A heavy user makes a few dollars a month — pocket money for time you were already spending, not an income program. We won't pretend otherwise. Balances are estimates until reconciled against advertiser-verified counts; cash out from <strong style="color: #ececea;">$5</strong> by PayPal or USDC, reviewed within ~30 days. No campaign live? The card says so, and nothing accrues.</p>
+          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8f88;">Cash out your way</span>
+            <span style="display: inline-flex; align-items: center; gap: 10px; border: 1px solid #2c2c28; background: #22221f; border-radius: 9px; padding: 11px 18px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/paypal-dark.svg" alt="" width="16" height="16" style="display: block;">PayPal</span>
+            <span style="display: inline-flex; align-items: center; gap: 10px; border: 1px solid #2c2c28; background: #22221f; border-radius: 9px; padding: 11px 18px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/usdc.svg" alt="" width="16" height="16" style="display: block;">USDC</span>
+            <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #8f8f88;">your choice — from $5</span>
+          </div>
         </div>
       </div>
     </div>
@@ -232,7 +270,7 @@
         <p style="font-size: 15.5px; line-height: 1.7; color: #a3a39b; margin: 0; max-width: 56ch;">One clearly labeled card in front of developers, builders, and writers — during the seconds they're locked on a generating response. Billed on viewable impressions only: ≥1s on screen, ≥50% visible, active tab. Verify with your own measurement. Pilots from $250.</p>
       </div>
       <div style="justify-self: start;">
-        <a href="/cdn-cgi/l/email-protection#4f3c3a3f3f203d3b0f2e2b382e263b612620703c3a2d252a2c3b720e2b392a3d3b263c2621286a7d7f20216a7d7f0e2b382e263b" class="btn-mint"><span class="__cf_email__" data-cfemail="e4979194948b9690a4858093858d90ca8d8b">[email&#160;protected]</span></a>
+        <a href="mailto:support@adwait.io?subject=Advertising%20on%20Adwait" class="btn-mint">support@adwait.io</a>
       </div>
     </div>
   </section>
@@ -258,14 +296,14 @@
       </a>
       <a href="/privacy" class="footlink">Privacy</a>
       <a href="/payment-support" class="footlink">How payments work</a>
-      <a href="/cdn-cgi/l/email-protection#03707673736c717743626774626a772d6a6c" class="footlink"><span class="__cf_email__" data-cfemail="5c2f292c2c332e281c3d382b3d3528723533">[email&#160;protected]</span></a>
+      <a href="mailto:support@adwait.io" class="footlink">support@adwait.io</a>
       <span style="margin-left: auto;">© 2026 Adwait</span>
     </div>
   </footer>
 
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 (function () {
   // ===== Edit these three constants =====
   var STORE_URL = "";        // Paste your Chrome Web Store listing URL when live. Empty → CTAs scroll to #how.
