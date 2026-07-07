@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 172 40" width="172" height="40">
+  
+  <circle cx="5" cy="20" r="5" fill="#c9c9c2"></circle>
+  <circle cx="20" cy="20" r="5" fill="#9a9a94"></circle>
+  <circle cx="35" cy="20" r="5" fill="#187a33"></circle>
+  <text x="52" y="29" font-size="26" fill="#1d1d1b">AdWait</text>
+</svg>
