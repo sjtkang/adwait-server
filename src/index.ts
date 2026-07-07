@@ -111,6 +111,7 @@ app.post('/api/payout/claim', ah(async (req, res) => {
   }
 }));
 
+app.use('/assets', express.static(path.join(process.cwd(), 'public', 'assets'), { maxAge: '1d' }));
 app.get('/api/stats', requireAdmin, ah(async (_req, res) => { res.json(await getStats()); }));
 
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
