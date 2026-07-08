@@ -23,6 +23,14 @@ const app = express();
 // refuse cross-site pages trying to POST events from visitors.
 app.use(express.json());
 
+// Keep the API host and operational paths out of search indexes
+app.use((req, res, next) => {
+  if (req.hostname === 'api.adwait.io' || req.path.startsWith('/api/') || req.path === '/admin') {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  }
+  next();
+});
+
 // Files are held in MEMORY just long enough to forward them to object storage,
 // then the buffer is discarded. Nothing touches the server's own disk — which
 // is exactly what makes uploads survive Render restarts and redeploys.
@@ -124,6 +132,9 @@ app.get('/', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'i
 app.get('/privacy', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'privacy.html')); });
 
 app.get('/payment-support', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'payment-support.html')); });
+
+app.get('/robots.txt', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'robots.txt')); });
+app.get('/sitemap.xml', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'sitemap.xml')); });
 
 app.get('/admin', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'admin.html')); });
 
