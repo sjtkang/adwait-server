@@ -37,8 +37,8 @@
   a.link-under:hover { color: #187a33; border-bottom-color: #187a33; }
   a.link-privacy { color: #187a33; text-decoration: none; border-bottom: 1px solid #cfe5d6; }
   a.link-privacy:hover { border-bottom-color: #187a33; }
-  a.btn-mint { display: inline-block; background: #57c07a; color: #10240f; text-decoration: none; border-radius: 10px; padding: 16px 28px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; }
-  a.btn-mint:hover { background: #6fd08f; }
+  a.btn-mint { display: inline-block; background: #187a33; color: #fff; text-decoration: none; border-radius: 10px; padding: 16px 28px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; }
+  a.btn-mint:hover { background: #14672b; }
   a.footlink { color: #8b8b84; text-decoration: none; }
   a.footlink:hover { color: #1d1d1b; }
   .soon-pill { display: none; background: #efefec; color: #77776f; border-radius: 10px; font-family: 'Fragment Mono', ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
@@ -48,6 +48,9 @@
   .marquee { display: flex; width: max-content; animation: marquee 30s linear infinite; }
   .marquee img { width: 20px; height: 20px; }
   @keyframes marquee { to { transform: translateX(-50%); } }
+  @media (max-width: 640px) {
+    a.navlink { display: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .anim { animation: none !important; }
@@ -96,7 +99,7 @@
       </div>
 
       <!-- Mini product moment: the browser while the model writes -->
-      <div style="flex: 1 1 300px; min-width: 300px; max-width: 440px;">
+      <div style="flex: 1 1 300px; min-width: 280px; max-width: 440px;">
         <div role="img" aria-label="A minimized chat window generating a response, with the Adwait ad card counting up earnings in the corner." style="position: relative; box-sizing: border-box; background: #161614; border: 1px solid #2c2c28; border-radius: 14px; padding: 14px 16px 16px; box-shadow: 0 18px 50px rgba(29, 29, 27, 0.22); overflow: hidden;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #34342e;"></span>
@@ -176,12 +179,12 @@
     <div style="max-width: 1120px; margin: 0 auto; padding: 64px 32px;">
       <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #57c07a;">The math, in the open</div>
       <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 12px 0 30px; color: #ffffff;">You keep half. Always.</h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 56px; align-items: start;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 56px; align-items: start;">
 
         <div style="background: #1d1d1a; border: 1px solid #2c2c28; border-radius: 14px; padding: 10px 26px 22px;">
           <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
             <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Advertiser pays</span>
-            <span style="color: #ececea;"><span id="ledger-cpm" style="color: #57c07a;">$20.00</span> / 1,000 views</span>
+            <span style="color: #ececea;"><span id="ledger-cpm" style="color: #57c07a;">$10.00</span> / 1,000 views</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
             <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Your share</span>
@@ -189,11 +192,11 @@
           </div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
             <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">One viewed ad</span>
-            <span id="ledger-view" style="color: #57c07a;">$0.0100</span>
+            <span id="ledger-view" style="color: #57c07a;">$0.0050</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
-            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Heavy month, ~40 ads/day</span>
-            <span style="color: #ececea;"><span id="ledger-month" style="color: #57c07a;">$12.00</span> / mo</span>
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Heavy month, ~250 ads/day</span>
+            <span style="color: #ececea;"><span id="ledger-month" style="color: #57c07a;">$37.50</span> / mo</span>
           </div>
           <div style="margin-top: 14px; padding-top: 16px; border-top: 1px solid #2c2c28; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; line-height: 1.7; color: #8f8f88;">REVENUE_SHARE = 0.5 — a constant in the code, not a promise on a slide.</div>
         </div>
@@ -230,14 +233,14 @@
 
   <!-- ============ ADVERTISERS ============ -->
   <section id="advertisers">
-    <div style="max-width: 1120px; margin: 0 auto; padding: 96px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: center;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 96px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 40px; align-items: center;">
       <div>
         <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">For advertisers</div>
         <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 16ch;">Buy the moment they can't look away.</h2>
-        <p style="font-size: 15.5px; line-height: 1.7; color: #55554f; margin: 0; max-width: 56ch;">One clearly labeled card in front of developers, builders, and writers — during the seconds they're locked on a generating response. Billed on viewable impressions only: ≥1s on screen, ≥50% visible, active tab. Verify with your own measurement. Pilots from $250.</p>
+        <p style="font-size: 15.5px; line-height: 1.7; color: #55554f; margin: 0; max-width: 56ch;">One clearly labeled card in front of developers, builders, and writers — during the seconds they're locked on a generating response. Billed on viewable impressions only: ≥1s on screen, ≥50% visible, active tab. Verify with your own measurement. Pilots from $400.</p>
       </div>
       <div style="justify-self: center;">
-        <a href="mailto:support@adwait.io?subject=Advertising%20on%20AdWait" class="btn-mint">support@adwait.io</a>
+        <a href="mailto:ads@adwait.io?subject=Advertising%20on%20AdWait" class="btn-mint">ads@adwait.io</a>
       </div>
     </div>
   </section>
@@ -257,7 +260,7 @@
 
   <!-- ============ FOOTER ============ -->
   <footer style="border-top: 1px solid #e7e7e2;">
-    <div style="margin: 0 auto; padding: 12px 32px 14px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84;">
+    <div style="margin: 0 auto; padding: 12px 32px 14px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84;">
       <a href="#" style="display: inline-flex; align-items: center; gap: 8px; color: #1d1d1b; text-decoration: none;">
         <span style="display: inline-flex; align-items: center; gap: 3px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #c9c9c2;"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: #9a9a94;"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: #187a33;"></span></span>
         <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.08em;">AdWait</span>
@@ -265,7 +268,7 @@
       <a href="/privacy" class="footlink">Privacy</a>
       <a href="/payment-support" class="footlink">How payments work</a>
       <a href="mailto:support@adwait.io" class="footlink">support@adwait.io</a>
-      <span style="margin-left: auto;">© 2026 AdWait</span>
+      <span>© 2026 AdWait</span>
     </div>
   </footer>
 
@@ -276,7 +279,7 @@
   // ===== Edit these three constants =====
   var STORE_URL = "";        // Paste your Chrome Web Store listing URL when live. Empty → CTAs scroll to #math.
   var COMING_SOON = false;   // true → CTAs become "Coming soon" pills.
-  var DEMO_CPM = 20;         // $ per 1,000 viewed ads, drives the demo counter + ledger numbers.
+  var DEMO_CPM = 10;         // $ per 1,000 viewed ads, drives the demo counter + ledger numbers.
   // ======================================
 
   if (COMING_SOON) document.body.classList.add('coming-soon');
@@ -293,7 +296,7 @@
   var monthEl = document.getElementById('ledger-month');
   if (cpmEl) cpmEl.textContent = '$' + DEMO_CPM.toFixed(2);
   if (viewEl) viewEl.textContent = '$' + perView.toFixed(4);
-  if (monthEl) monthEl.textContent = '$' + (perView * 40 * 30).toFixed(2);
+  if (monthEl) monthEl.textContent = '$' + (perView * 250 * 30).toFixed(2);
 
   var earnEls = [document.getElementById('demo-earn'), document.getElementById('demo-earn-mini')].filter(Boolean);
   var fillEls = [document.getElementById('demo-fill'), document.getElementById('demo-fill-mini')].filter(Boolean);
