@@ -3,35 +3,59 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Adwait — Admin</title>
+    <title>AdWait — Admin</title>
     <meta name="robots" content="noindex, nofollow">
     <style>
-      body { max-width: 820px; margin: 24px auto; padding: 0 16px; font-family: system-ui, -apple-system, sans-serif; color: #1a1a1a; }
+      :root {
+        --ink: #1a1a1a; --muted: #666; --line: #e2e2e2; --soft: #f6f6f4;
+        --ok: #2e7d32; --warn-ink: #92400e; --warn-bg: #fef3c7; --danger: #c0392b;
+        --pending-ink: #92400e; --pending-bg: #fef3c7;
+        --paid-ink: #1b5e20; --paid-bg: #e8f5e9;
+        --rejected-ink: #b71c1c; --rejected-bg: #fdecea;
+      }
+      body { max-width: 880px; margin: 24px auto; padding: 0 16px; font-family: system-ui, -apple-system, sans-serif; color: var(--ink); }
       h1 { font-size: 20px; }
-      h2 { font-size: 15px; margin-top: 24px; }
-      section { border: 1px solid #e2e2e2; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+      h2 { font-size: 15px; margin: 0; }
+      section { border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+      .section-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+      .section-head .spacer { flex: 1; }
       label { display: block; margin: 10px 0; font-size: 13px; }
       input, select, textarea { width: 100%; box-sizing: border-box; padding: 7px 9px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; font-family: inherit; }
       textarea { resize: vertical; min-height: 56px; }
+      select.inline, input.inline { width: auto; margin-top: 0; padding: 5px 8px; font-size: 13px; }
       button { background: #161616; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
       button.secondary { background: #eee; color: #161616; }
-      button.danger { background: #c0392b; }
-      small { color: #666; }
+      button.danger { background: var(--danger); }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      small { color: var(--muted); }
       .msg { font-size: 13px; min-height: 18px; margin-top: 8px; }
-      .msg.err { color: #c0392b; }
-      .msg.ok { color: #2e7d32; }
+      .msg.err { color: var(--danger); }
+      .msg.ok { color: var(--ok); }
       table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
       th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
-      th { color: #666; font-weight: 600; }
+      th { color: var(--muted); font-weight: 600; }
+      td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
       img.thumb { height: 28px; border-radius: 4px; vertical-align: middle; }
       tr.archived { opacity: 0.5; }
-      .warn { color: #c0392b; font-weight: 600; }
+      .warn { color: var(--danger); font-weight: 600; }
       td.actions button { margin-right: 4px; padding: 5px 9px; }
       td.actions input { width: 60px; display: inline-block; margin: 0 2px; }
+      .badge { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+      .badge.pending { color: var(--pending-ink); background: var(--pending-bg); }
+      .badge.paid { color: var(--paid-ink); background: var(--paid-bg); }
+      .badge.rejected { color: var(--rejected-ink); background: var(--rejected-bg); }
+      .rail { display: inline-block; font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; margin-right: 5px; }
+      .summary { font-size: 13px; color: var(--muted); background: var(--soft); border-radius: 8px; padding: 8px 12px; margin-top: 10px; font-variant-numeric: tabular-nums; }
+      .config-warning { display: none; font-size: 13px; color: var(--warn-ink); background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; margin-top: 10px; }
+      details.runbook { font-size: 13px; color: var(--muted); margin-top: 10px; }
+      details.runbook summary { cursor: pointer; color: var(--ink); }
+      details.runbook ol { margin: 8px 0 0 18px; padding: 0; }
+      details.runbook li { margin: 4px 0; }
+      td.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
     </style>
   </head>
   <body>
-    <h1>Adwait — Campaign Admin</h1>
+    <h1>AdWait — Admin</h1>
 
     <section>
       <label>Admin token <input id="token" type="password" placeholder="x-admin-token" /></label>
@@ -70,16 +94,94 @@
     </section>
 
     <section>
-      <h2>Payout claims <button id="refreshClaims" class="secondary" type="button">Refresh</button></h2>
+      <div class="section-head">
+        <h2>Payout claims</h2>
+        <span class="spacer"></span>
+        <select id="claimStatusFilter" class="inline" title="Filter by status">
+          <option value="pending" selected>Pending</option>
+          <option value="paid">Paid</option>
+          <option value="rejected">Rejected</option>
+          <option value="all">All statuses</option>
+        </select>
+        <select id="claimRailFilter" class="inline" title="Filter by payout rail">
+          <option value="all" selected>All rails</option>
+          <option value="paypal">Email (Tremendous)</option>
+          <option value="crypto">USDC</option>
+        </select>
+        <button id="refreshClaims" class="secondary" type="button">Refresh</button>
+        <button id="exportCsv" type="button">Export CSV</button>
+      </div>
+
+      <div id="configWarning" class="config-warning"></div>
+      <div id="claimSummary" class="summary">No claims loaded yet.</div>
+
       <table>
         <thead>
-          <tr><th>ID</th><th>Install</th><th>Destination</th><th>Amount</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
+          <tr><th>ID</th><th>Install</th><th>Destination</th><th class="num">Claimed</th><th class="num" title="Enter this amount in Tremendous. Tremendous adds its fee on top, and the fee-inclusive total equals what the user claimed.">Send via Tremendous</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
         </thead>
         <tbody id="claimRows"></tbody>
       </table>
+
+      <details class="runbook">
+        <summary>Manual payout runbook</summary>
+        <ol>
+          <li><strong>Export CSV</strong> — the file always contains every <em>pending email</em> claim (filters above only change this view, never the export). USDC claims never enter this file — send those manually from the owner wallet (Exodus) to the claim's address on Base, then Mark paid here.</li>
+          <li>In Tremendous: Send rewards → campaign <strong>AdWait cash-outs</strong> → Upload CSV or spreadsheet → upload this file. Use the file name as the order's unique ID so a re-upload can't double-pay. Confirm the order total matches the "billed" figure from the export message.</li>
+          <li>After the Tremendous order is confirmed, come back here and <strong>Mark paid</strong> on exactly the claims in that file. Reject anything that fails review — the amount returns to the user's balance automatically.</li>
+        </ol>
+      </details>
     </section>
 
     <script>
+      // ================= Tremendous payout configuration =================
+      // Fee mode is "add fees to your order total" (hybrid): the user's claimed
+      // balance covers Tremendous's fee, so the reward we SEND is smaller than
+      // the amount CLAIMED. sendAmount + fee(sendAmount) = claimedAmount.
+      //
+      // Verified against live sources 2026-07-11 (Claude, payout agent):
+      // - FEE_RATE / FEE_MIN: help.tremendous.com "Monetary reward options" —
+      //   under "Add fees to your order total", PayPal, Venmo, Cash App, and
+      //   Bank transfer (USA) are each 4% with a $0.25 USD per-reward minimum.
+      //   Other products differ; re-check that table if the catalog changes.
+      //   Standing cross-check: the order-review total at every CSV upload must
+      //   equal the export receipt's "billed" figure. If it ever doesn't, STOP,
+      //   flip FEE_CONFIRMED to false, and reconcile before sending.
+      // - CSV columns: verbatim from the dashboard-downloaded template
+      //   (Recipients_Template_for_Tremendous.csv): plain UTF-8, no BOM, CRLF,
+      //   currency column filled with USD.
+      const TREMENDOUS = {
+        FEE_RATE: 0.04,
+        FEE_MIN: 0.25,
+        FEE_CONFIRMED: true,
+        CSV_HEADERS: ['recipient_name', 'recipient_email (required)', 'amount (required)', 'currency_code'],
+        CSV_CONFIRMED: true,
+      };
+      // recipient_name is optional in Tremendous's own template, and the owner
+      // chose non-personalized delivery — we never ask users for a name, so it
+      // is sent blank. If the loop test shows the import or the reward email
+      // needs one after all, switch to:
+      //   (claim) => String(claim.destination).split('@')[0]
+      const nameForClaim = (_claim) => '';
+      const csvRow = (claim, sendAmount) => [nameForClaim(claim), String(claim.destination), sendAmount.toFixed(2), 'USD'];
+      // ===================================================================
+
+      // Floor to whole cents (never round a payout up). The epsilon absorbs
+      // float artifacts like 6.25 * 100 === 624.9999….
+      const floorCents = (x) => Math.floor(x * 100 + 1e-7) / 100;
+
+      // Solve sendAmount from claimedAmount under fee = max(rate·send, min):
+      // proportional region when rate·(A/(1+rate)) clears the minimum,
+      // otherwise the flat-minimum region (send = A − min).
+      function sendAmountForClaim(claimedAmount, rate = TREMENDOUS.FEE_RATE, min = TREMENDOUS.FEE_MIN) {
+        const a = Number(claimedAmount);
+        if (!Number.isFinite(a) || a <= 0) return 0;
+        let send = a / (1 + rate);
+        if (send * rate + 1e-9 < min) send = a - min;
+        if (send < 0) send = 0;
+        return floorCents(send);
+      }
+      const feeForSend = (send, rate = TREMENDOUS.FEE_RATE, min = TREMENDOUS.FEE_MIN) => (send <= 0 ? 0 : Math.max(send * rate, min));
+
       const tokenInput = document.getElementById('token');
       tokenInput.value = localStorage.getItem('adminToken') || '';
       tokenInput.addEventListener('change', () => localStorage.setItem('adminToken', tokenInput.value));
@@ -88,7 +190,7 @@
       const form = document.getElementById('form');
       const formatSel = document.getElementById('format');
       const budgetRow = document.getElementById('budgetRow');
-      const budgetInput = form.impressionsPurchased;
+      const budgetInput = form.elements.impressionsPurchased;
       const imageRow = document.getElementById('imageRow');
       const imageHint = document.getElementById('imageHint');
       const formTitle = document.getElementById('formTitle');
@@ -121,10 +223,10 @@
         editingId = c.id;
         formatSel.value = c.format;
         formatSel.disabled = true;          // format is immutable on edit
-        form.headline.value = c.headline;
-        form.body.value = c.body || '';
-        form.clickUrl.value = c.clickUrl;
-        form.cpm.value = Number(c.cpm);
+        form.elements.headline.value = c.headline;
+        form.elements.body.value = c.body || '';
+        form.elements.clickUrl.value = c.clickUrl;
+        form.elements.cpm.value = Number(c.cpm);
         budgetInput.disabled = true;        // budget changes via top-up, not edit
         budgetRow.style.display = 'none';
         imageHint.textContent = 'Replace image (optional — leave empty to keep current)';
@@ -232,41 +334,131 @@
 
       // ----- payout claims -----
       const claimRows = document.getElementById('claimRows');
+      const claimSummary = document.getElementById('claimSummary');
+      const configWarning = document.getElementById('configWarning');
+      const statusFilterSel = document.getElementById('claimStatusFilter');
+      const railFilterSel = document.getElementById('claimRailFilter');
+      const exportBtn = document.getElementById('exportCsv');
+
+      let currentClaims = [];
+
+      // The email rail is everything Tremendous delivers to. The extension still
+      // labels it 'paypal' (pre-Tremendous name, frozen until the post-review
+      // release); treat any future 'email'/'tremendous' type as the same rail.
+      const isEmailRail = (c) => c.destinationType !== 'crypto';
+      const railLabel = (c) => (isEmailRail(c) ? 'email' : 'USDC');
+      const money2 = (n) => '$' + Number(n).toFixed(2);
+      const money4 = (n) => '$' + Number(n).toFixed(4);
+
+      function syncConfigWarning() {
+        const missing = [];
+        if (!TREMENDOUS.FEE_CONFIRMED) missing.push('fee rate/minimum (read them off the campaign fee screen)');
+        if (!TREMENDOUS.CSV_CONFIRMED) missing.push('CSV columns (match the template downloaded from Tremendous)');
+        if (missing.length === 0) { configWarning.style.display = 'none'; return; }
+        configWarning.style.display = 'block';
+        configWarning.textContent = 'Placeholder config in use — confirm before the first real export: ' + missing.join('; ') + '. Assuming ' + (TREMENDOUS.FEE_RATE * 100) + '% fee, $' + TREMENDOUS.FEE_MIN.toFixed(2) + ' minimum per reward.';
+      }
+
+      const visibleClaims = () => currentClaims.filter((c) =>
+        (statusFilterSel.value === 'all' || c.status === statusFilterSel.value) &&
+        (railFilterSel.value === 'all' || (railFilterSel.value === 'crypto' ? !isEmailRail(c) : isEmailRail(c))));
+
+      // The export batch is ALWAYS every pending email claim — independent of the
+      // view filters, so a filtered view can never produce a short (or long) batch.
+      const exportableClaims = () => currentClaims.filter((c) => c.status === 'pending' && isEmailRail(c) && sendAmountForClaim(c.amount) > 0);
+
+      function renderClaims() {
+        syncConfigWarning();
+        const visible = visibleClaims();
+        claimRows.innerHTML = '';
+        for (const c of visible) {
+          const tr = document.createElement('tr');
+          // >1 install sharing one destination is the multi-profile-farming signal.
+          const shared = c.installsSharingDestination > 1
+            ? '<span class="warn">' + c.installsSharingDestination + ' installs</span>'
+            : '1';
+          const requested = new Date(c.requestedAt).toLocaleDateString();
+          const resolved = c.resolvedAt ? ' · ' + new Date(c.resolvedAt).toLocaleDateString() : '';
+          const send = isEmailRail(c) ? money2(sendAmountForClaim(c.amount)) : '—';
+          const actions = c.status === 'pending'
+            ? '<button data-claim="paid" data-id="' + c.id + '">Mark paid</button>' +
+              '<button class="danger" data-claim="rejected" data-id="' + c.id + '">Reject</button>'
+            : '&mdash;';
+          tr.innerHTML =
+            '<td>' + c.id + '</td>' +
+            '<td class="mono" title="' + escapeHtml(c.installId) + '">' + escapeHtml(String(c.installId).slice(0, 8)) + '&hellip;</td>' +
+            '<td><span class="rail">' + railLabel(c) + '</span>' + escapeHtml(c.destination) + '</td>' +
+            '<td class="num">' + money4(c.amount) + '</td>' +
+            '<td class="num">' + send + '</td>' +
+            '<td><span class="badge ' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span><small>' + resolved + '</small></td>' +
+            '<td>' + requested + '</td>' +
+            '<td>' + shared + '</td>' +
+            '<td class="actions">' + actions + '</td>';
+          claimRows.appendChild(tr);
+        }
+        if (visible.length === 0) claimRows.innerHTML = '<tr><td colspan="9">No claims match this view.</td></tr>';
+
+        // Summary always describes the WHOLE claim set, not just the view.
+        const pending = currentClaims.filter((c) => c.status === 'pending');
+        const pendingEmail = pending.filter(isEmailRail);
+        const pendingCrypto = pending.filter((c) => !isEmailRail(c));
+        const claimedSum = pendingEmail.reduce((s, c) => s + Number(c.amount), 0);
+        const sendSum = pendingEmail.reduce((s, c) => s + sendAmountForClaim(c.amount), 0);
+        claimSummary.textContent =
+          pending.length + ' pending — ' + pendingEmail.length + ' email (' + money2(claimedSum) + ' claimed → ' + money2(sendSum) + ' to send via Tremendous), ' +
+          pendingCrypto.length + ' USDC. Showing ' + visible.length + ' of ' + currentClaims.length + ' claims.';
+        exportBtn.textContent = 'Export CSV (' + exportableClaims().length + ' pending email)';
+        exportBtn.disabled = exportableClaims().length === 0;
+      }
+
+      // Minimal CSV quoting: wrap when the value contains a comma, quote, or newline.
+      const csvField = (v) => { const s = String(v); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+
+      function buildTremendousCsv() {
+        const batch = exportableClaims();
+        const lines = [TREMENDOUS.CSV_HEADERS.map(csvField).join(',')];
+        let sendSum = 0, billedSum = 0;
+        for (const c of batch) {
+          const send = sendAmountForClaim(c.amount);
+          sendSum += send; billedSum += send + feeForSend(send);
+          lines.push(csvRow(c, send).map(csvField).join(','));
+        }
+        return { csv: lines.join('\r\n') + '\r\n', count: batch.length, ids: batch.map((c) => c.id), sendSum, billedSum };
+      }
+
+      exportBtn.addEventListener('click', () => {
+        const built = buildTremendousCsv();
+        if (built.count === 0) { alert('No pending email claims to export.'); return; }
+        const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
+        const filename = 'adwait-tremendous-' + stamp + '.csv';
+        const blob = new Blob([built.csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        alert('Exported ' + built.count + ' claims (IDs ' + built.ids.join(', ') + ').\nSend total: $' + built.sendSum.toFixed(2) + ' — Tremendous will bill about $' + built.billedSum.toFixed(2) + ' including fees.\nUse the file name as the Tremendous order ID, and Mark paid exactly these claims once the order is confirmed.');
+      });
 
       async function loadClaims() {
         try {
           const res = await fetch('/api/admin/claims', { headers: authHeaders() });
           if (!res.ok) {
-            claimRows.innerHTML = '<tr><td colspan="8">' + (res.status === 401 ? 'Enter a valid admin token to view claims.' : 'Error ' + res.status) + '</td></tr>';
+            currentClaims = [];
+            claimRows.innerHTML = '<tr><td colspan="9">' + (res.status === 401 ? 'Enter a valid admin token to view claims.' : 'Error ' + res.status) + '</td></tr>';
+            claimSummary.textContent = 'Claims not loaded.';
+            exportBtn.disabled = true;
             return;
           }
-          const claims = await res.json();
-          claimRows.innerHTML = '';
-          for (const c of claims) {
-            const tr = document.createElement('tr');
-            // >1 install sharing one destination is the multi-profile-farming signal.
-            const shared = c.installsSharingDestination > 1
-              ? '<span class="warn">' + c.installsSharingDestination + ' installs</span>'
-              : '1';
-            const when = new Date(c.requestedAt).toLocaleDateString();
-            const actions = c.status === 'pending'
-              ? '<button data-claim="paid" data-id="' + c.id + '">Mark paid</button>' +
-                '<button class="danger" data-claim="rejected" data-id="' + c.id + '">Reject</button>'
-              : '&mdash;';
-            tr.innerHTML =
-              '<td>' + c.id + '</td>' +
-              '<td title="' + escapeHtml(c.installId) + '">' + escapeHtml(String(c.installId).slice(0, 8)) + '&hellip;</td>' +
-              '<td>' + escapeHtml(c.destinationType) + ': ' + escapeHtml(c.destination) + '</td>' +
-              '<td>$' + Number(c.amount).toFixed(4) + '</td>' +
-              '<td>' + escapeHtml(c.status) + '</td>' +
-              '<td>' + when + '</td>' +
-              '<td>' + shared + '</td>' +
-              '<td class="actions">' + actions + '</td>';
-            claimRows.appendChild(tr);
-          }
-          if (claims.length === 0) claimRows.innerHTML = '<tr><td colspan="8">No payout claims yet.</td></tr>';
+          currentClaims = await res.json();
+          renderClaims();
         } catch {
-          claimRows.innerHTML = '<tr><td colspan="8">Network error — is the server running?</td></tr>';
+          currentClaims = [];
+          claimRows.innerHTML = '<tr><td colspan="9">Network error — is the server running?</td></tr>';
+          claimSummary.textContent = 'Claims not loaded.';
+          exportBtn.disabled = true;
         }
       }
 
@@ -276,15 +468,21 @@
         const status = btn.getAttribute('data-claim');
         const id = btn.getAttribute('data-id');
         const question = status === 'paid'
-          ? 'Mark claim ' + id + ' as PAID? Do this only AFTER you have actually sent the money.'
+          ? 'Mark claim ' + id + ' as PAID? Do this only AFTER the Tremendous order (or USDC transfer) for it is actually placed.'
           : 'Reject claim ' + id + '? The amount returns to the available balance automatically.';
         if (!confirm(question)) return;
         doAction('POST', '/api/admin/claims/' + encodeURIComponent(id) + '/resolve', { status }).then(loadClaims);
       });
 
+      statusFilterSel.addEventListener('change', renderClaims);
+      railFilterSel.addEventListener('change', renderClaims);
       document.getElementById('refreshClaims').addEventListener('click', loadClaims);
 
       document.getElementById('refresh').addEventListener('click', loadList);
+
+      // Hooks for the headless test harness — no effect in normal use.
+      window.__adwaitTest = { sendAmountForClaim, feeForSend, buildTremendousCsv, renderClaims, visibleClaims, exportableClaims, setClaims: (c) => { currentClaims = c; renderClaims(); }, TREMENDOUS };
+
       enterCreateMode();
       loadList();
       loadClaims();
