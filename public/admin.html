@@ -117,7 +117,7 @@
 
       <table>
         <thead>
-          <tr><th>ID</th><th>Install</th><th>Destination</th><th class="num">Claimed</th><th class="num" title="Enter this amount in Tremendous. Tremendous adds its fee on top, and the fee-inclusive total equals what the user claimed.">Send via Tremendous</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
+          <tr><th>ID</th><th>Install</th><th>Destination</th><th class="num" title="Claimed balance before fee math. For USDC claims, send exactly this amount from the Exodus wallet.">Raw earnings</th><th class="num" title="Enter this amount in Tremendous. Tremendous adds its fee on top, and the fee-inclusive total equals what the user claimed.">Send via Tremendous</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
         </thead>
         <tbody id="claimRows"></tbody>
       </table>
@@ -125,7 +125,7 @@
       <details class="runbook">
         <summary>Manual payout runbook</summary>
         <ol>
-          <li><strong>Export CSV</strong> — the file always contains every <em>pending email</em> claim (filters above only change this view, never the export). USDC claims never enter this file — send those manually from the owner wallet (Exodus) to the claim's address on Base, then Mark paid here.</li>
+          <li><strong>Export CSV</strong> — the file always contains every <em>pending email</em> claim (filters above only change this view, never the export). USDC claims never enter this file — send the Raw earnings amount from the owner wallet (Exodus) to the claim's address on Base, then Mark paid here.</li>
           <li>In Tremendous: Send rewards → campaign <strong>AdWait cash-outs</strong> → Upload CSV or spreadsheet → upload this file. Use the file name as the order's unique ID so a re-upload can't double-pay. Confirm the order total matches the "billed" figure from the export message.</li>
           <li>After the Tremendous order is confirmed, come back here and <strong>Mark paid</strong> on exactly the claims in that file. Reject anything that fails review — the amount returns to the user's balance automatically.</li>
         </ol>
@@ -348,7 +348,7 @@
       const isEmailRail = (c) => c.destinationType !== 'crypto';
       const railLabel = (c) => (isEmailRail(c) ? 'email' : 'USDC');
       const money2 = (n) => '$' + Number(n).toFixed(2);
-      const money4 = (n) => '$' + Number(n).toFixed(4);
+      const money4 = (n) => '$' + (Math.floor(Number(n) * 10000 + 1e-7) / 10000).toFixed(4);
 
       function syncConfigWarning() {
         const missing = [];
@@ -379,7 +379,7 @@
             : '1';
           const requested = new Date(c.requestedAt).toLocaleDateString();
           const resolved = c.resolvedAt ? ' · ' + new Date(c.resolvedAt).toLocaleDateString() : '';
-          const send = isEmailRail(c) ? money2(sendAmountForClaim(c.amount)) : '—';
+          const send = isEmailRail(c) ? money2(sendAmountForClaim(c.amount)) : '';
           const actions = c.status === 'pending'
             ? '<button data-claim="paid" data-id="' + c.id + '">Mark paid</button>' +
               '<button class="danger" data-claim="rejected" data-id="' + c.id + '">Reject</button>'
@@ -405,7 +405,7 @@
         const claimedSum = pendingEmail.reduce((s, c) => s + Number(c.amount), 0);
         const sendSum = pendingEmail.reduce((s, c) => s + sendAmountForClaim(c.amount), 0);
         claimSummary.textContent =
-          pending.length + ' pending — ' + pendingEmail.length + ' email (' + money2(claimedSum) + ' claimed → ' + money2(sendSum) + ' to send via Tremendous), ' +
+          pending.length + ' pending — ' + pendingEmail.length + ' email (' + money2(claimedSum) + ' raw → ' + money2(sendSum) + ' via Tremendous), ' +
           pendingCrypto.length + ' USDC. Showing ' + visible.length + ' of ' + currentClaims.length + ' claims.';
         exportBtn.textContent = 'Export CSV (' + exportableClaims().length + ' pending email)';
         exportBtn.disabled = exportableClaims().length === 0;
@@ -481,7 +481,7 @@
       document.getElementById('refresh').addEventListener('click', loadList);
 
       // Hooks for the headless test harness — no effect in normal use.
-      window.__adwaitTest = { sendAmountForClaim, feeForSend, buildTremendousCsv, renderClaims, visibleClaims, exportableClaims, setClaims: (c) => { currentClaims = c; renderClaims(); }, TREMENDOUS };
+      window.__adwaitTest = { sendAmountForClaim, feeForSend, money4, buildTremendousCsv, renderClaims, visibleClaims, exportableClaims, setClaims: (c) => { currentClaims = c; renderClaims(); }, TREMENDOUS };
 
       enterCreateMode();
       loadList();
