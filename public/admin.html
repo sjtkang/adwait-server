@@ -52,6 +52,9 @@
       details.runbook ol { margin: 8px 0 0 18px; padding: 0; }
       details.runbook li { margin: 4px 0; }
       td.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+      tr.group-head td { background: var(--soft); border-top: 2px solid var(--line); font-size: 12px; padding: 5px 8px; }
+      label.inline-check { display: inline-flex; align-items: center; gap: 5px; margin: 0; font-size: 13px; white-space: nowrap; }
+      label.inline-check input { width: auto; margin: 0; }
     </style>
   </head>
   <body>
@@ -103,6 +106,7 @@
           <option value="rejected">Rejected</option>
           <option value="all">All statuses</option>
         </select>
+        <label class="inline-check" title="Cluster claims by install — multiple claims from one install in a short window is the farming pattern"><input type="checkbox" id="groupByInstall" /> Group by install</label>
         <select id="claimRailFilter" class="inline" title="Filter by payout rail">
           <option value="all" selected>All rails</option>
           <option value="paypal">Email (Tremendous)</option>
@@ -117,7 +121,7 @@
 
       <table>
         <thead>
-          <tr><th>ID</th><th>Install</th><th>Destination</th><th class="num" title="Claimed balance before fee math. For USDC claims, send exactly this amount from the Exodus wallet.">Raw earnings</th><th class="num" title="Enter this amount in Tremendous. Tremendous adds its fee on top, and the fee-inclusive total equals what the user claimed.">Send via Tremendous</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
+          <tr><th>Install</th><th>Destination</th><th class="num" title="Claimed balance before fee math. For USDC claims, send exactly this amount from the Exodus wallet.">Raw earnings</th><th class="num" title="Enter this amount in Tremendous. Tremendous adds its fee on top, and the fee-inclusive total equals what the user claimed.">Send via Tremendous</th><th>Status</th><th>Requested</th><th>Shared</th><th>Actions</th></tr>
         </thead>
         <tbody id="claimRows"></tbody>
       </table>
@@ -339,6 +343,7 @@
       const statusFilterSel = document.getElementById('claimStatusFilter');
       const railFilterSel = document.getElementById('claimRailFilter');
       const exportBtn = document.getElementById('exportCsv');
+      const groupToggle = document.getElementById('groupByInstall');
 
       let currentClaims = [];
 
@@ -367,36 +372,80 @@
       // view filters, so a filtered view can never produce a short (or long) batch.
       const exportableClaims = () => currentClaims.filter((c) => c.status === 'pending' && isEmailRail(c) && sendAmountForClaim(c.amount) > 0);
 
+      // 2+ claims from one install inside this window get flagged red.
+      const VELOCITY_WINDOW_MS = 24 * 60 * 60 * 1000;
+      const spanText = (ms) => {
+        if (ms < 90 * 1000) return Math.max(1, Math.round(ms / 1000)) + 's';
+        if (ms < 90 * 60 * 1000) return Math.round(ms / 60000) + 'm';
+        if (ms < 36 * 60 * 60 * 1000) return Math.round(ms / 3600000) + 'h';
+        return Math.round(ms / 86400000) + 'd';
+      };
+
+      function claimRowHtml(c) {
+        const shared = c.installsSharingDestination > 1
+          ? '<span class="warn">' + c.installsSharingDestination + ' installs</span>'
+          : '1';
+        const requested = new Date(c.requestedAt).toLocaleDateString();
+        const resolved = c.resolvedAt ? ' · ' + new Date(c.resolvedAt).toLocaleDateString() : '';
+        const send = isEmailRail(c) ? money2(sendAmountForClaim(c.amount)) : '';
+        const actions = c.status === 'pending'
+          ? '<button data-claim="paid" data-id="' + c.id + '">Mark paid</button>' +
+            '<button class="danger" data-claim="rejected" data-id="' + c.id + '">Reject</button>'
+          : '&mdash;';
+        return '<td class="mono" title="' + escapeHtml(c.installId) + '">' + escapeHtml(String(c.installId).slice(0, 8)) + '&hellip;</td>' +
+          '<td><span class="rail">' + railLabel(c) + '</span>' + escapeHtml(c.destination) + '</td>' +
+          '<td class="num">' + money4(c.amount) + '</td>' +
+          '<td class="num">' + send + '</td>' +
+          '<td><span class="badge ' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span><small>' + resolved + '</small></td>' +
+          '<td>' + requested + '</td>' +
+          '<td>' + shared + '</td>' +
+          '<td class="actions">' + actions + '</td>';
+      }
+
+      function appendClaimRow(c) {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-claim-id', c.id);
+        tr.innerHTML = claimRowHtml(c);
+        claimRows.appendChild(tr);
+      }
+
+      function renderGrouped(visible) {
+        const groups = new Map();
+        for (const c of visible) {
+          if (!groups.has(c.installId)) groups.set(c.installId, []);
+          groups.get(c.installId).push(c);
+        }
+        // Suspicious first: most claims, then most recent activity.
+        const latest = (list) => Math.max(...list.map((c) => +new Date(c.requestedAt)));
+        const sorted = [...groups.entries()].sort((a, b) => (b[1].length - a[1].length) || (latest(b[1]) - latest(a[1])));
+        for (const [installId, list] of sorted) {
+          list.sort((a, b) => +new Date(b.requestedAt) - +new Date(a.requestedAt));
+          const raw = list.reduce((s, c) => s + Number(c.amount), 0);
+          const emails = list.filter(isEmailRail);
+          const sendSum = emails.reduce((s, c) => s + sendAmountForClaim(c.amount), 0);
+          const span = latest(list) - Math.min(...list.map((c) => +new Date(c.requestedAt)));
+          const velocity = list.length > 1
+            ? (span <= VELOCITY_WINDOW_MS
+                ? '<span class="warn">' + list.length + ' claims in ' + spanText(span) + '</span>'
+                : list.length + ' claims over ' + spanText(span))
+            : 'single claim';
+          const sharedFlag = list.some((c) => c.installsSharingDestination > 1) ? ' · <span class="warn">shared destination</span>' : '';
+          const head = document.createElement('tr');
+          head.className = 'group-head';
+          head.innerHTML = '<td colspan="8"><span class="mono" title="' + escapeHtml(installId) + '">' + escapeHtml(String(installId).slice(0, 8)) + '&hellip;</span> · ' +
+            velocity + ' · ' + money2(raw) + ' raw' + (emails.length ? ' · ' + money2(sendSum) + ' via Tremendous' : '') + sharedFlag + '</td>';
+          claimRows.appendChild(head);
+          for (const c of list) appendClaimRow(c);
+        }
+      }
+
       function renderClaims() {
         syncConfigWarning();
         const visible = visibleClaims();
         claimRows.innerHTML = '';
-        for (const c of visible) {
-          const tr = document.createElement('tr');
-          // >1 install sharing one destination is the multi-profile-farming signal.
-          const shared = c.installsSharingDestination > 1
-            ? '<span class="warn">' + c.installsSharingDestination + ' installs</span>'
-            : '1';
-          const requested = new Date(c.requestedAt).toLocaleDateString();
-          const resolved = c.resolvedAt ? ' · ' + new Date(c.resolvedAt).toLocaleDateString() : '';
-          const send = isEmailRail(c) ? money2(sendAmountForClaim(c.amount)) : '';
-          const actions = c.status === 'pending'
-            ? '<button data-claim="paid" data-id="' + c.id + '">Mark paid</button>' +
-              '<button class="danger" data-claim="rejected" data-id="' + c.id + '">Reject</button>'
-            : '&mdash;';
-          tr.innerHTML =
-            '<td>' + c.id + '</td>' +
-            '<td class="mono" title="' + escapeHtml(c.installId) + '">' + escapeHtml(String(c.installId).slice(0, 8)) + '&hellip;</td>' +
-            '<td><span class="rail">' + railLabel(c) + '</span>' + escapeHtml(c.destination) + '</td>' +
-            '<td class="num">' + money4(c.amount) + '</td>' +
-            '<td class="num">' + send + '</td>' +
-            '<td><span class="badge ' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span><small>' + resolved + '</small></td>' +
-            '<td>' + requested + '</td>' +
-            '<td>' + shared + '</td>' +
-            '<td class="actions">' + actions + '</td>';
-          claimRows.appendChild(tr);
-        }
-        if (visible.length === 0) claimRows.innerHTML = '<tr><td colspan="9">No claims match this view.</td></tr>';
+        if (groupToggle.checked) renderGrouped(visible);
+        else for (const c of visible) appendClaimRow(c);
+        if (visible.length === 0) claimRows.innerHTML = '<tr><td colspan="8">No claims match this view.</td></tr>';
 
         // Summary always describes the WHOLE claim set, not just the view.
         const pending = currentClaims.filter((c) => c.status === 'pending');
@@ -423,7 +472,7 @@
           sendSum += send; billedSum += send + feeForSend(send);
           lines.push(csvRow(c, send).map(csvField).join(','));
         }
-        return { csv: lines.join('\r\n') + '\r\n', count: batch.length, ids: batch.map((c) => c.id), sendSum, billedSum };
+        return { csv: lines.join('\r\n') + '\r\n', count: batch.length, ids: batch.map((c) => c.id), claims: batch, sendSum, billedSum };
       }
 
       exportBtn.addEventListener('click', () => {
@@ -439,7 +488,8 @@
         a.click();
         a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-        alert('Exported ' + built.count + ' claims (IDs ' + built.ids.join(', ') + ').\nSend total: $' + built.sendSum.toFixed(2) + ' — Tremendous will bill about $' + built.billedSum.toFixed(2) + ' including fees.\nUse the file name as the Tremendous order ID, and Mark paid exactly these claims once the order is confirmed.');
+        const batchLines = built.claims.map((c) => '  ' + c.destination + ' — $' + sendAmountForClaim(c.amount).toFixed(2)).join('\n');
+        alert('Exported ' + built.count + ' claims:\n' + batchLines + '\nSend total: $' + built.sendSum.toFixed(2) + ' — Tremendous will bill about $' + built.billedSum.toFixed(2) + ' including fees.\nUse the file name as the Tremendous order ID, and Mark paid exactly these claims once the order is confirmed.');
       });
 
       async function loadClaims() {
@@ -447,7 +497,7 @@
           const res = await fetch('/api/admin/claims', { headers: authHeaders() });
           if (!res.ok) {
             currentClaims = [];
-            claimRows.innerHTML = '<tr><td colspan="9">' + (res.status === 401 ? 'Enter a valid admin token to view claims.' : 'Error ' + res.status) + '</td></tr>';
+            claimRows.innerHTML = '<tr><td colspan="8">' + (res.status === 401 ? 'Enter a valid admin token to view claims.' : 'Error ' + res.status) + '</td></tr>';
             claimSummary.textContent = 'Claims not loaded.';
             exportBtn.disabled = true;
             return;
@@ -456,7 +506,7 @@
           renderClaims();
         } catch {
           currentClaims = [];
-          claimRows.innerHTML = '<tr><td colspan="9">Network error — is the server running?</td></tr>';
+          claimRows.innerHTML = '<tr><td colspan="8">Network error — is the server running?</td></tr>';
           claimSummary.textContent = 'Claims not loaded.';
           exportBtn.disabled = true;
         }
@@ -467,21 +517,24 @@
         if (!btn) return;
         const status = btn.getAttribute('data-claim');
         const id = btn.getAttribute('data-id');
+        const claim = currentClaims.find((c) => String(c.id) === String(id));
+        const who = claim ? claim.destination + ' (' + money4(claim.amount) + ' raw)' : 'claim ' + id;
         const question = status === 'paid'
-          ? 'Mark claim ' + id + ' as PAID? Do this only AFTER the Tremendous order (or USDC transfer) for it is actually placed.'
-          : 'Reject claim ' + id + '? The amount returns to the available balance automatically.';
+          ? 'Mark ' + who + ' as PAID? Do this only AFTER the Tremendous order (or USDC transfer) for it is actually placed.'
+          : 'Reject ' + who + '? The amount returns to the available balance automatically.';
         if (!confirm(question)) return;
         doAction('POST', '/api/admin/claims/' + encodeURIComponent(id) + '/resolve', { status }).then(loadClaims);
       });
 
       statusFilterSel.addEventListener('change', renderClaims);
       railFilterSel.addEventListener('change', renderClaims);
+      groupToggle.addEventListener('change', renderClaims);
       document.getElementById('refreshClaims').addEventListener('click', loadClaims);
 
       document.getElementById('refresh').addEventListener('click', loadList);
 
       // Hooks for the headless test harness — no effect in normal use.
-      window.__adwaitTest = { sendAmountForClaim, feeForSend, money4, buildTremendousCsv, renderClaims, visibleClaims, exportableClaims, setClaims: (c) => { currentClaims = c; renderClaims(); }, TREMENDOUS };
+      window.__adwaitTest = { sendAmountForClaim, feeForSend, money4, spanText, buildTremendousCsv, renderClaims, visibleClaims, exportableClaims, setClaims: (c) => { currentClaims = c; renderClaims(); }, TREMENDOUS };
 
       enterCreateMode();
       loadList();
