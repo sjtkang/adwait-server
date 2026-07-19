@@ -120,6 +120,25 @@ app.post('/api/payout/claim', ah(async (req, res) => {
 }));
 
 app.use('/assets', express.static(path.join(process.cwd(), 'public', 'assets'), { maxAge: '1d' }));
+// ── Cloudflare Access belt-and-suspenders ────────────────────────────────
+// Access only guards traffic that flows through Cloudflare. Render's
+// *.onrender.com URL reaches this origin directly, so admin surfaces would
+// sidestep Access there. This host check closes that casual bypass: admin
+// routes answer only on the proxied hostnames (plus localhost for dev), and
+// respond 404 — not 403 — so the wrong host doesn't learn the surface
+// exists. Honest limit: a direct-to-origin client can forge a Host header,
+// so ADMIN_TOKEN remains the real lock; this is the second factor, not the
+// first. Override the allow-list with ADMIN_HOSTS (comma-separated), e.g.
+// narrow it to the one hostname your Access application actually covers.
+const ADMIN_HOSTS = (process.env.ADMIN_HOSTS ?? 'adwait.io,api.adwait.io')
+  .split(',').map((h) => h.trim().toLowerCase()).filter(Boolean);
+function requireAdminHost(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const host = (req.header('host') ?? '').toLowerCase().split(':')[0];
+  if (host === 'localhost' || host === '127.0.0.1' || ADMIN_HOSTS.includes(host)) { next(); return; }
+  res.status(404).end();
+}
+app.use(['/admin', '/api/admin', '/api/stats'], requireAdminHost);
+
 app.get('/api/stats', requireAdmin, ah(async (_req, res) => { res.json(await getStats()); }));
 
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
