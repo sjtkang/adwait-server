@@ -151,7 +151,7 @@ app.get('/', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'i
 app.get('/privacy', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'privacy.html')); });
 
 app.get('/payment-support', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'payment-support.html')); });
-
+app.get('/advertise', (_req, res) => res.sendFile(path.join(process.cwd(), 'public', 'advertise.html')));
 app.get('/robots.txt', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'robots.txt')); });
 app.get('/sitemap.xml', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'sitemap.xml')); });
 

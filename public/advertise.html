@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advertise on AdWait</title>
+<meta name="description" content="One clearly labeled ad in front of AI power users during the seconds they are watching a response generate. Billed on viewable impressions only. Pilots from $100.">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="/assets/logo/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; background: #fbfbf9; }
+  body { margin: 0; background: #fbfbf9; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+         font-family: system-ui, -apple-system, sans-serif; color: #1d1d1b; font-size: 16px; line-height: 1.6; }
+  * { box-sizing: border-box; }
+  ::selection { background: #187a33; color: #fff; }
+  :focus-visible { outline: 2px solid #187a33; outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+  .mono { font-family: 'Fragment Mono', ui-monospace, monospace; }
+  .eyebrow { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em;
+             text-transform: uppercase; color: #187a33; }
+  .eyebrow.mint { color: #57c07a; }
+  h1, h2, h3.big { font-family: Newsreader, Georgia, serif; font-weight: 500; letter-spacing: -0.02em; margin: 0; }
+  h1 { font-size: clamp(38px, 4.6vw, 62px); line-height: 1.02; letter-spacing: -0.03em; }
+  h2 { font-size: clamp(30px, 3.8vw, 46px); line-height: 1.05; }
+  a { color: #187a33; }
+  .btn { display: inline-block; background: #187a33; color: #fff; text-decoration: none; border: 0; cursor: pointer;
+         border-radius: 10px; padding: 15px 26px; font-family: 'Fragment Mono', ui-monospace, monospace;
+         font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; }
+  .btn:hover { background: #14672b; }
+  .btn.ghost { background: transparent; color: #1d1d1b; border: 1px solid #d9d9d4; }
+  .btn.ghost:hover { background: #f2f2ee; }
+  nav { border-bottom: 1px solid #e7e7e2; }
+  .nav-in { display: flex; align-items: center; gap: 24px; padding: 18px 0; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: #1d1d1b; text-decoration: none; }
+  .dots { display: inline-flex; align-items: center; gap: 4px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; }
+  .navlink { color: #6f6f68; text-decoration: none; font-size: 13.5px; }
+  .navlink:hover { color: #1d1d1b; }
+  section { padding: 76px 0; }
+  .dark { background: #161614; color: #ececea; }
+  .dark h2 { color: #fff; }
+  .dark p { color: #a3a39b; }
+  .lede { font-size: 18px; line-height: 1.55; color: #55554f; max-width: 58ch; }
+  .grid { display: grid; gap: 40px; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
+  .rule { border-top: 1px solid #e7e7e2; padding-top: 18px; }
+  .dark .rule { border-color: #2c2c28; }
+  .card { background: #fff; border: 1px solid #e7e7e2; border-radius: 14px; padding: 26px; }
+  .dark .card { background: #1d1d1a; border-color: #2c2c28; }
+  .price { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 34px; color: #1d1d1b; letter-spacing: -0.02em; }
+  .dark .price { color: #fff; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 0;
+         border-bottom: 1px dashed #e7e7e2; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; }
+  .dark .row { border-color: #32322c; }
+  .row span:first-child { color: #8b8b84; text-transform: uppercase; letter-spacing: 0.06em; }
+  .dark .row span:first-child { color: #8f8f88; }
+  .k { color: #187a33; }
+  .dark .k { color: #57c07a; }
+  ul.clean { list-style: none; padding: 0; margin: 0; }
+  ul.clean li { position: relative; padding-left: 20px; margin-bottom: 10px; font-size: 15px; color: #45453f; }
+  .dark ul.clean li { color: #a3a39b; }
+  ul.clean li::before { content: ""; position: absolute; left: 0; top: 9px; width: 7px; height: 7px;
+                        border-radius: 50%; background: #187a33; }
+  .dark ul.clean li::before { background: #57c07a; }
+  details { border-bottom: 1px solid #e7e7e2; }
+  details:first-of-type { border-top: 1px solid #e7e7e2; }
+  summary { cursor: pointer; padding: 17px 2px; font-size: 15.5px; font-weight: 600; list-style: none; display: flex; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; margin-left: auto; color: #8b8b84; font-weight: 400; }
+  details[open] summary::after { content: "\2212"; }
+  details p { margin: 0 2px 18px; font-size: 14.5px; color: #45453f; max-width: 74ch; }
+  label { display: block; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px;
+          letter-spacing: 0.1em; text-transform: uppercase; color: #8b8b84; margin-bottom: 7px; }
+  input, select, textarea { width: 100%; font-family: inherit; font-size: 14.5px; color: #1d1d1b; background: #fff;
+    border: 1px solid #e7e7e2; border-radius: 9px; padding: 11px 13px; }
+  textarea { min-height: 92px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #187a33; }
+  select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%238b8b84' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 11px center; }
+  .field { margin-bottom: 16px; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  footer { border-top: 1px solid #e7e7e2; }
+  .foot-in { display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap;
+             padding: 22px 0 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
+  .foot-in a { color: #8b8b84; text-decoration: none; }
+  .foot-in a:hover { color: #1d1d1b; }
+  @media (max-width: 640px) { .navlink { display: none; } section { padding: 56px 0; } .wrap { padding: 0 22px; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .anim { animation: none !important; } }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <a class="brand" href="/">
+    <span class="dots"><i style="background:#c9c9c2"></i><i style="background:#9a9a94"></i><i style="background:#187a33"></i></span>
+    <span class="mono" style="font-size:15px; letter-spacing:0.08em;">AdWait</span>
+  </a>
+  <div style="margin-left:auto; display:flex; gap:22px; flex-wrap:wrap;">
+    <a class="navlink" href="#placement">The placement</a>
+    <a class="navlink" href="#pricing">Pricing</a>
+    <a class="navlink" href="#specs">Specs</a>
+  </div>
+  <a class="btn" href="#book" style="padding:10px 18px; font-size:12px;">Book a pilot</a>
+</div></nav>
+
+<!-- HERO -->
+<section style="padding-bottom:44px;"><div class="wrap">
+  <div class="eyebrow">For advertisers</div>
+  <h1 style="margin:20px 0 22px; max-width:16ch;">Buy the moment they cannot look away.</h1>
+  <p class="lede" style="margin:0 0 30px;">AdWait places one clearly labeled ad in the corner of ChatGPT, Claude, Gemini, Perplexity, Replit and five more AI tools, during the seconds a person is watching a response generate. You are billed on viewable impressions only, and half of what you pay goes to the person who watched.</p>
+  <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
+    <a class="btn" href="#book">Book a pilot</a>
+    <a class="btn ghost" href="#pricing">See pricing</a>
+    <span class="mono" style="font-size:12px; color:#9a9a94;">Pilots from $100. Prepaid, no contract.</span>
+  </div>
+</div></section>
+
+<!-- THE PLACEMENT -->
+<section id="placement" style="padding-top:34px;"><div class="wrap">
+  <div class="grid" style="align-items:center;">
+    <div>
+      <div class="eyebrow">The placement</div>
+      <h2 style="margin:14px 0 18px;">One ad. The only thing on screen worth looking at.</h2>
+      <ul class="clean">
+        <li>Appears only while the model is generating, in a corner the user chose.</li>
+        <li>Labeled "Ad · AdWait", rendered in an isolated container that never covers the page's own content or controls.</li>
+        <li>Disappears the moment the response finishes.</li>
+        <li>No autoplay, no sound, no interstitials, no retargeting pixels.</li>
+        <li>The user earns 50% of what you paid, so attention here is willing rather than resented.</li>
+      </ul>
+    </div>
+    <div>
+      <!-- Live example of the real card -->
+      <div role="img" aria-label="A chat window generating a response with the AdWait ad card in the corner."
+           style="position:relative; background:#161614; border:1px solid #2c2c28; border-radius:14px; padding:14px 16px 16px; box-shadow:0 18px 50px rgba(29,29,27,0.2); overflow:hidden;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:#34342e"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#34342e"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#34342e"></span>
+          <span class="mono" style="margin-left:10px; font-size:10px; color:#77776f;">chatgpt.com</span>
+        </div>
+        <div style="margin-top:20px; padding-bottom:104px;">
+          <div style="background:#262621; color:#d6d6cf; border-radius:9px; padding:8px 12px; font-size:12px; width:fit-content; max-width:90%; margin-left:auto;">Refactor this service and explain the tradeoffs.</div>
+          <div style="margin-top:18px; color:#d6d6cf; font-size:12px; line-height:1.55;">Here is the refactor, in three parts:</div>
+          <div style="display:flex; flex-direction:column; gap:9px; margin-top:12px;">
+            <div class="anim" style="height:9px;border-radius:5px;width:92%;background:linear-gradient(90deg,#2a2a25 25%,#37372f 37%,#2a2a25 63%);background-size:400% 100%;animation:shimmer 1.6s infinite linear"></div>
+            <div class="anim" style="height:9px;border-radius:5px;width:76%;background:linear-gradient(90deg,#2a2a25 25%,#37372f 37%,#2a2a25 63%);background-size:400% 100%;animation:shimmer 1.6s infinite linear;animation-delay:.12s"></div>
+            <div class="anim" style="height:9px;border-radius:5px;width:54%;background:linear-gradient(90deg,#2a2a25 25%,#37372f 37%,#2a2a25 63%);background-size:400% 100%;animation:shimmer 1.6s infinite linear;animation-delay:.24s"></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:16px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #3a3a34;border-radius:50%;">
+              <span style="width:8px;height:8px;background:#d6d6cf;border-radius:2px;"></span>
+            </span>
+            <span class="anim mono" style="font-size:10.5px; color:#77776f; animation:pulse 1.8s infinite;">Generating…</span>
+          </div>
+        </div>
+        <div style="position:absolute; right:14px; bottom:14px; width:250px; max-width:calc(100% - 28px); background:#fff; color:#1d1d1b; border:1px solid #e7e7e2; border-radius:11px; padding:26px 14px 14px; box-shadow:0 6px 24px rgba(0,0,0,.35); overflow:hidden;">
+          <span class="mono" style="position:absolute; top:8px; left:12px; font-size:8.5px; letter-spacing:0.08em; text-transform:uppercase; color:#9a9a94;">Ad · AdWait</span>
+          <span class="mono" style="position:absolute; top:7px; right:12px; font-size:10px; color:#187a33;">+ $0.0040</span>
+          <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Your headline goes here</div>
+          <div style="font-size:11.5px; color:#6b6b66; line-height:1.45;">One line of body copy, your logo or image, and a click through to your site.</div>
+          <div style="position:absolute; left:0; right:0; bottom:0; height:3px; background:#f0f0ec;"><div style="height:100%; width:64%; background:#187a33;"></div></div>
+        </div>
+      </div>
+      <div class="mono" style="margin-top:12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#9a9a94;">Actual placement, shown at size.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- VIEWABILITY -->
+<section class="dark" id="viewability"><div class="wrap">
+  <div class="eyebrow mint">What you are buying</div>
+  <h2 style="margin:14px 0 34px;">A viewable impression, defined precisely.</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="row"><span>At least</span><span class="k">50% of the ad visible</span></div>
+      <div class="row"><span>For at least</span><span class="k">1 continuous second</span></div>
+      <div class="row"><span>In the</span><span class="k">active browser tab</span></div>
+      <div class="row" style="border:0;"><span>Standard</span><span style="color:#ececea;">IAB display viewability</span></div>
+      <div class="mono" style="margin-top:16px; padding-top:16px; border-top:1px solid #2c2c28; font-size:11px; line-height:1.7; color:#8f8f88;">Anything short of that is not billed, not counted, and not credited to the user either.</div>
+    </div>
+    <div>
+      <p style="margin:0 0 18px; font-size:15.5px; line-height:1.7;">Most display inventory bills on served impressions and reports viewability afterwards. AdWait counts only the impressions that met the bar in the first place, because the same measurement decides what the person watching gets paid. The incentive to inflate does not exist: every fake impression would cost us a real payout.</p>
+      <ul class="clean">
+        <li>Bring your own measurement. If your numbers and ours disagree, we reconcile to yours.</li>
+        <li>Minimum-viewable-time reporting is included, not an upsell.</li>
+        <li>Background tabs, scrolled-away cards and sub-second flashes are all excluded automatically.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- PRICING -->
+<section id="pricing"><div class="wrap">
+  <div class="eyebrow">Rate card</div>
+  <h2 style="margin:14px 0 12px;">Prepaid pilots. One rate.</h2>
+  <p class="lede" style="margin:0 0 34px;">Every pilot runs at <strong>$8 CPM</strong>, billed against viewable impressions. Campaigns run until the purchased volume is delivered. Nothing auto-renews and nothing expires.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="mono" style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#8b8b84;">Entry test</div>
+      <div class="price" style="margin:10px 0 4px;">$100</div>
+      <div class="mono" style="font-size:12.5px; color:#55554f; margin-bottom:20px;">12,500 viewable impressions</div>
+      <ul class="clean">
+        <li>The smallest honest read on whether this audience responds to you.</li>
+        <li>Same targeting, same reporting, same placement as the standard pilot.</li>
+        <li>Good for a single creative and a single landing page.</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:#187a33;">
+      <div class="mono" style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#187a33;">Standard pilot &nbsp;·&nbsp; recommended</div>
+      <div class="price" style="margin:10px 0 4px;">$200</div>
+      <div class="mono" style="font-size:12.5px; color:#55554f; margin-bottom:20px;">25,000 viewable impressions</div>
+      <ul class="clean">
+        <li>Enough volume for a readable result rather than a rounding error.</li>
+        <li>Room to rotate two creatives and compare them.</li>
+        <li>Full reach and frequency reporting at completion.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin:26px 0 0; font-size:14.5px; color:#55554f;">Larger volumes, longer flights, or exclusive placement during a launch window: write to <a href="mailto:ads@adwait.io">ads@adwait.io</a> and we will quote it.</p>
+</div></section>
+
+<!-- AUDIENCE + REPORTING -->
+<section style="padding-top:0;"><div class="wrap">
+  <div class="grid">
+    <div class="rule">
+      <div class="eyebrow" style="margin-bottom:12px;">Who sees it</div>
+      <p style="font-size:15px; color:#45453f; margin:0 0 12px;">People who use AI tools heavily enough to install something that pays them for waiting: developers, builders, founders, writers, students.</p>
+      <p class="mono" style="font-size:12px; line-height:1.9; color:#55554f; margin:0;">
+        ChatGPT · Claude (chat, Code, Design) · Gemini<br>
+        Perplexity · Grok · DeepSeek · Copilot<br>
+        Replit Agent · Base44
+      </p>
+      <p style="font-size:14px; color:#8b8b84; margin:14px 0 0;">Agent sessions on Replit, Base44 and Claude Code run for minutes at a time, which is the longest attention window on the network.</p>
+    </div>
+    <div class="rule">
+      <div class="eyebrow" style="margin-bottom:12px;">What you get back</div>
+      <ul class="clean">
+        <li>Viewable impressions delivered, by day.</li>
+        <li>Reach: how many distinct people saw you.</li>
+        <li>Frequency: how often each of them did.</li>
+        <li>Total viewable time your creative held.</li>
+        <li>An invoice that reconciles to the same numbers.</li>
+      </ul>
+      <p style="font-size:14px; color:#8b8b84; margin:14px 0 0;">We do not track clicks. Put your own UTM parameters on the destination URL and measure the outcome on your side, where it belongs.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- SPECS + PROCESS -->
+<section id="specs" style="padding-top:0;"><div class="wrap">
+  <div class="grid">
+    <div class="rule">
+      <div class="eyebrow" style="margin-bottom:12px;">Creative specs</div>
+      <div class="row"><span>Image formats</span><span style="color:#1d1d1b;">PNG, JPEG, WebP, GIF</span></div>
+      <div class="row"><span>Max file size</span><span style="color:#1d1d1b;">2 MB</span></div>
+      <div class="row"><span>Max dimension</span><span style="color:#1d1d1b;">2000 px per side</span></div>
+      <div class="row"><span>Card width</span><span style="color:#1d1d1b;">300 px, so keep it simple</span></div>
+      <div class="row"><span>Text option</span><span style="color:#1d1d1b;">headline + one line of body</span></div>
+      <div class="row" style="border:0;"><span>Required</span><span style="color:#1d1d1b;">click-through URL</span></div>
+      <p style="font-size:14px; color:#8b8b84; margin:14px 0 0;">Send whatever you have. If you do not have a creative sized for this, say so in the form and we will lay one out from your existing brand assets at no charge.</p>
+    </div>
+    <div class="rule">
+      <div class="eyebrow" style="margin-bottom:12px;">How booking works</div>
+      <ul class="clean">
+        <li><strong>1.</strong> You send the form below or email ads@adwait.io.</li>
+        <li><strong>2.</strong> We reply with an invoice (Wise) and a creative checklist, usually same day.</li>
+        <li><strong>3.</strong> Payment clears, creative goes in, campaign goes live.</li>
+        <li><strong>4.</strong> You get a mid-flight check-in and a full report at completion.</li>
+        <li><strong>5.</strong> Renew, adjust, or walk away. Prepaid means there is nothing to cancel.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- FAQ -->
+<section style="padding-top:0;"><div class="wrap">
+  <div class="eyebrow">Straight answers</div>
+  <h2 style="margin:14px 0 26px;">The questions buyers actually ask.</h2>
+  <details><summary>How big is the audience right now?</summary><p>AdWait is new, and we will tell you the real number when you ask rather than a range designed to impress. That is exactly why the entry pilot exists at $100: the correct way to evaluate a young network is a small prepaid test with honest reporting, not a media kit. If we cannot deliver your volume in a reasonable window, we will tell you before invoicing.</p></details>
+  <details><summary>Is this brand safe?</summary><p>Your ad appears on nine mainstream AI tools and nowhere else. There is no user-generated content around it, no comment section, and no adjacent inventory. One ad renders at a time, always labeled, always in an isolated container that cannot cover the page's own interface.</p></details>
+  <details><summary>Do you track clicks or conversions?</summary><p>No. A click opens your site in a new tab and we record nothing about it. Tag your destination URL and measure on your own analytics. We would rather report five numbers we can stand behind than fifteen we cannot.</p></details>
+  <details><summary>Can I verify the impression counts?</summary><p>Yes, and we would prefer you did. Run your own viewability measurement on the creative. Billing reconciles to verified counts, and if your numbers are lower than ours, yours win.</p></details>
+  <details><summary>Is there a frequency cap?</summary><p>Not currently, and that is deliberate on a network this size: repetition is how a small audience produces a readable result, and the person watching is paid for every impression. You get full reach and frequency reporting, so you can judge the tradeoff yourself and we will cap on request.</p></details>
+  <details><summary>Who is behind this?</summary><p>AdWait is built and run by Tommy Kang, a solo founder. You deal with him directly: the person who answers your email is the person who runs your campaign and writes your report. If you want the exact rules an impression has to pass before you are billed for it, ask and you will get them in writing.</p></details>
+</div></section>
+
+<!-- BOOKING -->
+<section class="dark" id="book"><div class="wrap">
+  <div class="grid" style="gap:48px;">
+    <div>
+      <div class="eyebrow mint">Book a pilot</div>
+      <h2 style="margin:14px 0 18px;">Tell us what you sell.</h2>
+      <p style="margin:0 0 20px; font-size:15.5px; line-height:1.7;">Fill this in and it opens a prefilled email to ads@adwait.io from your own mail client, so you keep the thread. No account, no calendar link, no sales sequence. You will hear back from a person, usually the same day.</p>
+      <p class="mono" style="font-size:12.5px; color:#8f8f88; margin:0;">Prefer plain email? <a href="mailto:ads@adwait.io?subject=Advertising%20on%20AdWait" style="color:#57c07a;">ads@adwait.io</a></p>
+    </div>
+    <div class="card">
+      <div class="field"><label for="f-co">Company</label><input id="f-co" type="text" autocomplete="organization" placeholder="Acme Inc."></div>
+      <div class="field"><label for="f-url">Website</label><input id="f-url" type="text" inputmode="url" placeholder="acme.com"></div>
+      <div class="field"><label for="f-name">Your name</label><input id="f-name" type="text" autocomplete="name" placeholder="Jane Doe"></div>
+      <div class="field"><label for="f-tier">Pilot</label>
+        <select id="f-tier">
+          <option value="Standard pilot, $200 (25,000 viewable impressions)">Standard pilot, $200</option>
+          <option value="Entry test, $100 (12,500 viewable impressions)">Entry test, $100</option>
+          <option value="Larger or custom volume, please quote">Larger or custom, please quote</option>
+          <option value="Not sure yet, would like advice">Not sure yet</option>
+        </select>
+      </div>
+      <div class="field"><label for="f-creative">Creative</label>
+        <select id="f-creative">
+          <option value="Ready to send">Ready to send</option>
+          <option value="Have brand assets, need it laid out">Have assets, need layout help</option>
+          <option value="Text ad is fine">Text ad is fine</option>
+        </select>
+      </div>
+      <div class="field"><label for="f-notes">Anything else</label><textarea id="f-notes" placeholder="Timing, target audience, what a win looks like."></textarea></div>
+      <div class="hp"><label for="f-fax">Fax</label><input id="f-fax" type="text" tabindex="-1" autocomplete="off"></div>
+      <button class="btn" id="f-send" style="width:100%;">Compose email</button>
+      <button class="btn ghost" id="f-copy" style="width:100%; margin-top:10px; background:transparent; color:#ececea; border-color:#32322c;">Copy details instead</button>
+      <p class="mono" id="f-status" style="font-size:11px; color:#8f8f88; margin:12px 0 0; min-height:16px;"></p>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap foot-in">
+  <a class="brand" href="/">
+    <span class="dots"><i style="background:#c9c9c2"></i><i style="background:#9a9a94"></i><i style="background:#187a33"></i></span>
+    <span class="mono" style="font-size:13px; letter-spacing:0.08em;">AdWait</span>
+  </a>
+  <a href="/">For users</a>
+  <a href="/privacy">Privacy</a>
+  <a href="/payment-support">How payments work</a>
+  <a href="mailto:ads@adwait.io">ads@adwait.io</a>
+  <span>© 2026 AdWait</span>
+</div></footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var status = $('f-status');
+
+  function collect() {
+    return {
+      company: ($('f-co').value || '').trim(),
+      url: ($('f-url').value || '').trim(),
+      name: ($('f-name').value || '').trim(),
+      tier: $('f-tier').value,
+      creative: $('f-creative').value,
+      notes: ($('f-notes').value || '').trim(),
+      trap: ($('f-fax').value || '').trim()
+    };
+  }
+  function body(d) {
+    return 'Company: ' + (d.company || '-') +
+      '\nWebsite: ' + (d.url || '-') +
+      '\nContact: ' + (d.name || '-') +
+      '\nPilot: ' + d.tier +
+      '\nCreative: ' + d.creative +
+      '\n\nNotes:\n' + (d.notes || '-') +
+      '\n\n(Sent from adwait.io/advertise)';
+  }
+  function validate(d) {
+    if (d.trap) return 'Something went wrong. Please email ads@adwait.io directly.';
+    if (!d.company && !d.url) return 'Add a company or a website so we know who you are.';
+    return null;
+  }
+
+  $('f-send').addEventListener('click', function () {
+    var d = collect(), err = validate(d);
+    if (err) { status.textContent = err; return; }
+    var subject = 'Advertising on AdWait' + (d.company ? ' - ' + d.company : '');
+    window.location.href = 'mailto:ads@adwait.io?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body(d));
+    status.textContent = 'Opening your mail client. If nothing happens, use "Copy details instead".';
+  });
+
+  $('f-copy').addEventListener('click', function () {
+    var d = collect(), err = validate(d);
+    if (err) { status.textContent = err; return; }
+    var text = 'To: ads@adwait.io\nSubject: Advertising on AdWait' + (d.company ? ' - ' + d.company : '') + '\n\n' + body(d);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        status.textContent = 'Copied. Paste it into an email to ads@adwait.io.';
+      }, function () { status.textContent = 'Copy failed. Email ads@adwait.io directly.'; });
+    } else {
+      status.textContent = 'Copy unavailable here. Email ads@adwait.io directly.';
+    }
+  });
+})();
+</script>
+</body>
+</html>
