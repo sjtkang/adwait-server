@@ -149,7 +149,7 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
 app.get('/', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'index.html')); });
 
 app.get('/privacy', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'privacy.html')); });
-
+app.get('/terms', (_req, res) => res.sendFile(path.join(process.cwd(), 'public', 'terms.html')));
 app.get('/payment-support', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'payment-support.html')); });
 app.get('/advertise', (_req, res) => res.sendFile(path.join(process.cwd(), 'public', 'advertise.html')));
 app.get('/robots.txt', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'robots.txt')); });
