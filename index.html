@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AdWait — Get Paid While AI Thinks</title>
+<meta name="description" content="A Chrome extension that shows one small, clearly labeled ad while AI writes — and pays you half of what the advertiser paid.">
+  <link rel="canonical" href="https://adwait.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AdWait">
+  <meta property="og:url" content="https://adwait.io/">
+  <meta property="og:title" content="AdWait — get paid while AI thinks">
+  <meta property="og:description" content="A Chrome extension that shows one small, clearly labeled ad while AI writes — and pays you half of what the advertiser paid.">
+  <meta property="og:image" content="https://adwait.io/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AdWait — get paid while AI thinks">
+  <meta name="twitter:description" content="A Chrome extension that shows one small, clearly labeled ad while AI writes — and pays you half of what the advertiser paid.">
+  <meta name="twitter:image" content="https://adwait.io/assets/og.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AdWait",
+      "alternateName": ["adwait.io"],
+      "url": "https://adwait.io/"
+    }
+  </script>
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/logo/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; background: #fbfbf9; }
+  body { margin: 0; background: #fbfbf9; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  ::selection { background: #187a33; color: #fff; }
+  :focus-visible { outline: 2px solid #187a33; outline-offset: 3px; border-radius: 4px; }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  a.navlink { color: #6f6f68; text-decoration: none; font-size: 13.5px; }
+  a.navlink:hover { color: #1d1d1b; }
+  a.btn-green { display: inline-block; background: #187a33; color: #fff; text-decoration: none; border-radius: 10px; font-family: 'Fragment Mono', ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
+  a.btn-green:hover { background: #14672b; }
+  a.link-under { color: #55554f; text-decoration: none; font-size: 14.5px; border-bottom: 1px solid #d9d9d4; }
+  a.link-under:hover { color: #187a33; border-bottom-color: #187a33; }
+  a.link-privacy { color: #187a33; text-decoration: none; border-bottom: 1px solid #cfe5d6; }
+  a.link-privacy:hover { border-bottom-color: #187a33; }
+  a.btn-mint { display: inline-block; background: #187a33; color: #fff; text-decoration: none; border-radius: 10px; padding: 16px 28px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; }
+  a.btn-mint:hover { background: #14672b; }
+  a.footlink { color: #8b8b84; text-decoration: none; }
+  a.footlink:hover { color: #1d1d1b; }
+  .soon-pill { display: none; background: #efefec; color: #77776f; border-radius: 10px; font-family: 'Fragment Mono', ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
+  body.coming-soon .cta-add { display: none; }
+  body.coming-soon .soon-pill { display: inline-block; }
+  .marquee-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+  .marquee { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+  .marquee img { width: 15px; height: 15px; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  @media (max-width: 640px) {
+    a.navlink { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .anim { animation: none !important; }
+    .marquee { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div style="font-family: system-ui, -apple-system, sans-serif; color: #1d1d1b; background: #fbfbf9; font-size: 16px; line-height: 1.6;">
+
+  <!-- ============ NAV ============ -->
+  <nav style="border-bottom: 1px solid #e7e7e2;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; gap: 28px;">
+      <a href="#" style="display: inline-flex; align-items: center; gap: 10px; color: #1d1d1b; text-decoration: none;">
+        <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 7px; height: 7px; border-radius: 50%; background: #c9c9c2;"></span><span style="width: 7px; height: 7px; border-radius: 50%; background: #9a9a94;"></span><span style="width: 7px; height: 7px; border-radius: 50%; background: #187a33;"></span></span>
+        <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 15px; letter-spacing: 0.08em;">AdWait</span>
+      </a>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+        <a href="#how" class="navlink">How it works</a>
+        <a href="/advertise" class="navlink">For advertisers</a>
+      </div>
+      <a href="#how" class="btn-green cta-add" rel="noopener" style="padding: 10px 18px; font-size: 12px; letter-spacing: 0.06em; border-radius: 9px;">Add to Chrome</a>
+      <span class="soon-pill" style="padding: 10px 18px; font-size: 12px; letter-spacing: 0.06em; border-radius: 9px;">Coming soon</span>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <header>
+    <div style="max-width: 1120px; margin: 0 auto; padding: 52px 32px 56px;">
+      <div style="display: flex; flex-wrap: wrap; gap: 48px; align-items: center;">
+        <div style="flex: 1 1 360px; min-width: 280px;">
+          <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">A Chrome extension</div>
+          <h1 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(42px, 4.8vw, 72px); line-height: 1.0; letter-spacing: -0.03em; margin: 22px 0 26px; max-width: 12ch; text-wrap: balance;">Get paid while AI <em style="font-style: italic;">thinks.</em></h1>
+          <p style="font-size: 18.5px; line-height: 1.55; color: #55554f; max-width: 56ch; margin: 0 0 32px;">Ads are coming to AI either way — so why not get paid for yours? AdWait shows one small, clearly labeled ad while the model generates, and puts the <b>earnings right into your wallet.</b></p>
+          <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <a href="#how" class="btn-green cta-add" rel="noopener" style="padding: 16px 28px; font-size: 13px;">Add to Chrome — free</a>
+            <span class="soon-pill" style="padding: 16px 28px; font-size: 13px; border-radius: 10px;">Coming soon to the Chrome Web Store</span>
+            <a href="#how" class="link-under">How it works ↓</a>
+          </div>
+          <div style="display: flex; align-items: center; column-gap: 18px; row-gap: 10px; flex-wrap: wrap; margin-top: 24px;">
+            <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">Cash out from $5</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/paypal.svg" alt="" width="15" height="15" style="display: block;">PayPal</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/venmo.svg" alt="" width="15" height="15" style="display: block; border-radius: 3.5px;">Venmo</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/cashapp.svg" alt="" width="15" height="15" style="display: block; border-radius: 3.5px;">Cash App</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/usdc.svg" alt="" width="15" height="15" style="display: block;">USDC</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #1d1d1b;"><img src="assets/bank.svg" alt="" width="15" height="15" style="display: block;">Bank (USD)</span>
+          </div>
+          <div style="margin-top: 8px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.04em; color: #9a9a94;">*Payout methods may vary by region</div>
+        </div>
+
+        <!-- Mini product moment: the browser while the model writes -->
+        <div style="flex: 1 1 320px; min-width: 280px; max-width: 440px;">
+          <div role="img" aria-label="A minimized chat window generating a response, with the AdWait ad card counting up earnings in the corner." style="position: relative; box-sizing: border-box; background: #161614; border: 1px solid #2c2c28; border-radius: 14px; padding: 14px 16px 16px; box-shadow: 0 18px 50px rgba(29, 29, 27, 0.22); overflow: hidden;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #34342e;"></span>
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #34342e;"></span>
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #34342e;"></span>
+              <span style="margin-left: 8px; background: #22221f; border: 1px solid #2c2c28; border-radius: 6px; padding: 3px 10px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; color: #8f8f88;">chatgpt.com</span>
+              <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: 0.08em; color: #57c07a;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #57c07a;"></span>ADWAIT ON</span>
+            </div>
+            <div style="margin-top: 18px; padding-bottom: 104px;">
+              <div style="background: #262621; color: #d6d6cf; border-radius: 9px; padding: 8px 12px; font-size: 12px; line-height: 1.5; width: fit-content; max-width: 88%; margin-left: auto;">Draft the launch plan, then rewrite it for the exec review.</div>
+              <div style="margin-top: 16px; color: #d6d6cf; font-size: 12px; line-height: 1.55;">Here's the launch plan, structured in three phases —</div>
+              <div style="display: flex; flex-direction: column; gap: 9px; margin-top: 12px;">
+                <div class="anim" style="height: 9px; border-radius: 5px; width: 92%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear;"></div>
+                <div class="anim" style="height: 9px; border-radius: 5px; width: 78%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.12s;"></div>
+                <div class="anim" style="height: 9px; border-radius: 5px; width: 55%; background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%); background-size: 400% 100%; animation: shimmer 1.6s infinite linear; animation-delay: 0.24s;"></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 14px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid #3a3a34; border-radius: 50%;">
+                  <span style="width: 7px; height: 7px; background: #d6d6cf; border-radius: 2px;"></span>
+                </span>
+                <span class="anim" style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10.5px; color: #77776f; animation: pulse 1.8s infinite;">Generating…</span>
+              </div>
+            </div>
+            <!-- The sample ad card -->
+            <div style="position: absolute; right: 14px; bottom: 14px; width: 252px; max-width: calc(100% - 28px); box-sizing: border-box; background: #ffffff; color: #1d1d1b; border-radius: 11px; padding: 27px 14px 13px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); overflow: hidden;">
+              <span style="position: absolute; top: 8px; left: 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a94;">Ad · AdWait</span>
+              <span id="demo-earn-mini" style="position: absolute; top: 7px; right: 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10.5px; color: #187a33;">+ $0.0000</span>
+              <div style="font-size: 12.5px; font-weight: 600; letter-spacing: -0.1px; margin-bottom: 3px;">This ad is paying you.</div>
+              <div style="font-size: 11.5px; color: #6b6b66; line-height: 1.45;">AdWait credits you 50% of the revenue for every ad you actually see.</div>
+              <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #f0f0ec;">
+                <div id="demo-fill-mini" style="height: 100%; width: 0%; background: #187a33;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94; line-height: 1.6;">One labeled ad while the model writes — response ends, ad vanishes.</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; column-gap: 13px; row-gap: 8px; margin-top: 44px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">
+        <span style="white-space: nowrap;">No account</span>
+        <span style="white-space: nowrap;">·&nbsp;&nbsp;50% revenue share</span>
+        <span style="white-space: nowrap;">·&nbsp;&nbsp;Clearly labeled ads</span>
+        <span style="white-space: nowrap;">·&nbsp;&nbsp;<span style="color: #187a33;">Free forever</span></span>
+      </div>
+    </div>
+
+    <!-- Full-bleed works-on band -->
+    <div style="border-top: 1px solid #e7e7e2; padding: 16px 0; display: flex; align-items: center;">
+      <span style="flex: none; padding-left: max(32px, calc((100% - 1120px) / 2 + 32px)); padding-right: 32px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">Works on</span>
+      <div class="marquee-wrap" style="flex: 1 1 0; min-width: 0;">
+        <div class="marquee">
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/chatgpt.svg" alt="" width="15" height="15" style="display: block;">ChatGPT</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/grok.svg" alt="" width="15" height="15" style="display: block;">Grok</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><span style="width: 18px; height: 18px; border-radius: 5px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 9px;">44</span>Base44</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/chatgpt.svg" alt="" width="15" height="15" style="display: block;">ChatGPT</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/grok.svg" alt="" width="15" height="15" style="display: block;">Grok</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><span style="width: 18px; height: 18px; border-radius: 5px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 9px;">44</span>Base44</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ THE MATH ============ -->
+  <section id="how" style="background: #161614; color: #ececea; min-height: 100vh; min-height: 100svh; display: flex; align-items: center;">
+    <div style="width: 100%; max-width: 1120px; margin: 0 auto; padding: 64px 32px;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #57c07a;">How it works</div>
+      <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 12px 0 30px; color: #ffffff;">You keep half. Always.</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 56px; align-items: start;">
+
+        <div style="background: #1d1d1a; border: 1px solid #2c2c28; border-radius: 14px; padding: 10px 26px 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Advertiser pays</span>
+            <span style="color: #ececea;"><span id="ledger-cpm" style="color: #57c07a;">$10.00</span> / 1,000 views</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Your share</span>
+            <span style="color: #57c07a;">50%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px dashed #32322c; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">One viewed ad</span>
+            <span id="ledger-view" style="color: #57c07a;">$0.0050</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px;">
+            <span style="color: #8f8f88; text-transform: uppercase; letter-spacing: 0.06em;">Heavy month, ~250 ads/day</span>
+            <span style="color: #ececea;"><span id="ledger-month" style="color: #57c07a;">$37.50</span> / mo</span>
+          </div>
+          <div style="margin-top: 14px; padding-top: 16px; border-top: 1px solid #2c2c28; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; line-height: 1.7; color: #8f8f88;">REVENUE_SHARE = 0.5 — a constant in the code, not a promise on a slide.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div>
+            <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8f88; margin-bottom: 10px;">Ads on AI today</div>
+            <div style="height: 46px; border: 1px solid #2c2c28; border-radius: 8px; background: #22221f; display: flex; align-items: center; justify-content: center;">
+              <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #77776f; letter-spacing: 0.06em;">PLATFORM KEEPS 100% — YOU GET $0</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8f88; margin-bottom: 10px;">AdWait</div>
+            <div style="height: 46px; border: 1px solid #2c2c28; border-radius: 8px; overflow: hidden; display: flex;">
+              <div style="width: 50%; background: #187a33; display: flex; align-items: center; justify-content: center;">
+                <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #ffffff; letter-spacing: 0.06em;">YOU — 50%</span>
+              </div>
+              <div style="width: 50%; background: #22221f; display: flex; align-items: center; justify-content: center;">
+                <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #77776f; letter-spacing: 0.06em;">ADWAIT — 50%</span>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 15px; line-height: 1.7; color: #a3a39b; margin: 0;">Your AI subscription might end up paying for itself. Heavy users can earn around $37/month simply from the time they'd already spend waiting for AI responses. Cash out from <strong style="color: #ececea;">$5</strong> to PayPal, Venmo, Cash App, USDC, or straight to your bank after advertiser verification, typically within 3 days.</p>
+          <div style="display: flex; align-items: center; column-gap: 20px; row-gap: 12px; flex-wrap: wrap;">
+            <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8f88;">Cash out your way</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/paypal-dark.svg" alt="" width="16" height="16" style="display: block;">PayPal</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/venmo.svg" alt="" width="16" height="16" style="display: block; border-radius: 4px;">Venmo</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/cashapp.svg" alt="" width="16" height="16" style="display: block; border-radius: 4px;">Cash App</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/usdc.svg" alt="" width="16" height="16" style="display: block;">USDC</span>
+            <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #ececea;"><img src="assets/bank-dark.svg" alt="" width="16" height="16" style="display: block;">Bank (USD)</span>
+            <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #8f8f88;">from $5</span>
+          </div>
+          <div style="margin-top: -10px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.04em; color: #77776f;">*Payout methods may vary by region</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ADVERTISERS ============ -->
+  <section id="advertisers">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 96px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 40px; align-items: center;">
+      <div>
+        <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33;">For advertisers</div>
+        <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 16ch;">Buy the moment they can't look away.</h2>
+        <p style="font-size: 15.5px; line-height: 1.7; color: #55554f; margin: 0; max-width: 56ch;">One clearly labeled card in front of developers, builders, and writers — during the seconds they're locked on a generating response. Billed on viewable impressions only: ≥1s on screen, ≥50% visible, active tab. Verify with your own measurement. Pilots from $100.</p>
+      </div>
+      <div style="justify-self: center;">
+        <a href="/advertise" class="btn-mint">See rates and book</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section style="background: #161614; color: #ececea;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 110px 32px; text-align: center;">
+      <div style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #57c07a;">Ready when you are</div>
+      <h2 style="font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(38px, 5.5vw, 68px); line-height: 1.02; letter-spacing: -0.025em; margin: 18px auto 16px; max-width: 18ch; text-wrap: balance; color: #ffffff;">The wait was always worth <em style="font-style: italic;">something.</em></h2>
+      <p style="font-size: 16.5px; color: #a3a39b; margin: 0 auto 32px; max-width: 44ch;">Install once. Use AI like you always do. Cash out when it adds up.</p>
+      <div style="display: flex; justify-content: center;">
+        <a href="#how" class="btn-mint cta-add" rel="noopener" style="padding: 17px 32px; font-size: 13.5px;">Add to Chrome — free</a>
+        <span class="soon-pill" style="padding: 17px 32px; font-size: 13.5px; border-radius: 10px; background: #22221f; color: #8f8f88;">Coming soon to the Chrome Web Store</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer style="border-top: 1px solid #e7e7e2;">
+    <div style="margin: 0 auto; padding: 12px 32px 14px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84;">
+      <a href="#" style="display: inline-flex; align-items: center; gap: 8px; color: #1d1d1b; text-decoration: none;">
+        <span style="display: inline-flex; align-items: center; gap: 3px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #c9c9c2;"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: #9a9a94;"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: #187a33;"></span></span>
+        <span style="font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.08em;">AdWait</span>
+      </a>
+      <a href="/advertise" class="footlink">Advertise</a>
+      <a href="/payment-support" class="footlink">Payments</a>
+      <span><a href="/privacy" class="footlink">Privacy</a>/<a href="/terms" class="footlink">Terms</a></span>
+      <a href="mailto:support@adwait.io" class="footlink">support@adwait.io</a>
+      <span>© 2026 AdWait</span>
+    </div>
+  </footer>
+
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function () {
+  // ===== Edit these three constants =====
+  var STORE_URL = "";        // Paste your Chrome Web Store listing URL when live. Empty → CTAs scroll to #how.
+  var COMING_SOON = true;    // true → CTAs become "Coming soon" pills.
+  var DEMO_CPM = 10;         // $ per 1,000 viewed ads, drives the demo counter + ledger numbers.
+  // ======================================
+
+  if (COMING_SOON) document.body.classList.add('coming-soon');
+  if (STORE_URL) {
+    document.querySelectorAll('.cta-add').forEach(function (a) {
+      a.href = STORE_URL;
+      a.target = '_blank';
+    });
+  }
+
+  var perView = DEMO_CPM / 2000;
+  var cpmEl = document.getElementById('ledger-cpm');
+  var viewEl = document.getElementById('ledger-view');
+  var monthEl = document.getElementById('ledger-month');
+  if (cpmEl) cpmEl.textContent = '$' + DEMO_CPM.toFixed(2);
+  if (viewEl) viewEl.textContent = '$' + perView.toFixed(4);
+  if (monthEl) monthEl.textContent = '$' + (perView * 250 * 30).toFixed(2);
+
+  var earnEls = [document.getElementById('demo-earn'), document.getElementById('demo-earn-mini')].filter(Boolean);
+  var fillEls = [document.getElementById('demo-fill'), document.getElementById('demo-fill-mini')].filter(Boolean);
+  if (!earnEls.length || !fillEls.length) return;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    earnEls.forEach(function (el) { el.textContent = '+ $' + perView.toFixed(4); });
+    fillEls.forEach(function (el) { el.style.width = '100%'; });
+    return;
+  }
+  var CYCLE = 4200, PAUSE = 900;
+  var start = performance.now();
+  function tick(now) {
+    if (now - start >= CYCLE + PAUSE) start = now;
+    var p = Math.min(1, (now - start) / CYCLE);
+    earnEls.forEach(function (el) { el.textContent = '+ $' + (perView * p).toFixed(4); });
+    fillEls.forEach(function (el) { el.style.width = (p * 100) + '%'; });
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

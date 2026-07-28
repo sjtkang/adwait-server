@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advertise on AdWait — own the pause before the answer</title>
+<meta name="description" content="One clearly labeled ad in eleven AI tools, shown only while the model is generating. Billed on viewable impressions only. Prepaid pilots from $100.">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/logo/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: #fbfbf9; }
+  body {
+    margin: 0; background: #fbfbf9; color: #1d1d1b;
+    font-family: system-ui, -apple-system, sans-serif; font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  ::selection { background: #187a33; color: #fff; }
+  :focus-visible { outline: 2px solid #187a33; outline-offset: 3px; border-radius: 4px; }
+  a { color: #187a33; }
+  a:hover { color: #14672b; }
+  img { display: block; }
+
+  .mono { font-family: 'Fragment Mono', ui-monospace, monospace; }
+  .serif { font-family: Newsreader, Georgia, serif; font-weight: 500; letter-spacing: -0.02em; }
+  .serif em { font-style: italic; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+  .eyebrow { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #187a33; }
+  .eyebrow--dark { color: #57c07a; }
+
+  /* nav */
+  .nav { border-bottom: 1px solid #e7e7e2; }
+  .nav__inner { max-width: 1120px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; gap: 28px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: #1d1d1b; text-decoration: none; }
+  .dots { display: inline-flex; align-items: center; gap: 4px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: #c9c9c2; }
+  .dots i:nth-child(2) { background: #9a9a94; }
+  .dots i:nth-child(3) { background: #187a33; }
+  .brand span:last-child { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 15px; letter-spacing: 0.08em; }
+  .nav__links { margin-left: auto; display: flex; align-items: center; gap: 24px; }
+  .nav__links a { color: #6f6f68; text-decoration: none; font-size: 13.5px; }
+  .nav__links a:hover { color: #1d1d1b; }
+
+  .btn {
+    display: inline-block; border: 0; cursor: pointer; text-decoration: none;
+    background: #187a33; color: #fff; border-radius: 10px; padding: 17px 32px;
+    font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; letter-spacing: 0.07em; text-transform: uppercase;
+  }
+  .btn:hover { background: #14672b; color: #fff; }
+  .btn--sm { border-radius: 9px; padding: 10px 18px; font-size: 12px; letter-spacing: 0.06em; }
+  .btn--block { display: block; width: 100%; padding: 15px 26px; font-size: 13px; }
+  .btn--block + .btn--block { margin-top: 10px; }
+  .btn--ghost { background: transparent; color: #ececea; border: 1px solid #32322c; }
+  .btn--ghost:hover { background: transparent; color: #ececea; border-color: #57c07a; }
+  .textlink { color: #55554f; text-decoration: none; font-size: 14.5px; border-bottom: 1px solid #d9d9d4; }
+  .textlink:hover { color: #187a33; border-bottom-color: #187a33; }
+
+  /* hero */
+  .hero { text-align: center; }
+  .hero__top { max-width: 1000px; margin: 0 auto; padding: 84px 32px 8px; }
+  .hero h1 { font-size: clamp(48px, 6.6vw, 92px); line-height: 0.98; letter-spacing: -0.035em; margin: 24px auto 26px; max-width: 15ch; text-wrap: balance; }
+  .hero__sub { font-size: 19px; line-height: 1.55; color: #55554f; max-width: 52ch; margin: 0 auto 34px; }
+  .hero__cta { display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; }
+
+  /* placement mock */
+  .mock__frame { max-width: 660px; margin: 44px auto 0; padding: 0 32px; }
+  .mock {
+    position: relative; background: #161614; border: 1px solid #2c2c28; border-radius: 16px;
+    padding: 16px 18px 18px; box-shadow: 0 34px 80px rgba(29,29,27,0.28); overflow: hidden; text-align: left;
+  }
+  .mock__bar { display: flex; align-items: center; gap: 6px; }
+  .mock__bar > i { width: 9px; height: 9px; border-radius: 50%; background: #34342e; }
+  .mock__url { margin-left: 8px; background: #22221f; border: 1px solid #2c2c28; border-radius: 6px; padding: 4px 12px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #8f8f88; }
+  .mock__on { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: #57c07a; }
+  .mock__on i { width: 6px; height: 6px; border-radius: 50%; background: #57c07a; }
+  .mock__body { margin-top: 22px; padding-bottom: 120px; }
+  .mock__q { background: #262621; color: #d6d6cf; border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.5; width: fit-content; max-width: 86%; margin-left: auto; }
+  .mock__a { margin-top: 18px; color: #d6d6cf; font-size: 13px; line-height: 1.55; }
+  .skeleton { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .skeleton i {
+    height: 10px; border-radius: 5px;
+    background: linear-gradient(90deg, #2a2a25 25%, #37372f 37%, #2a2a25 63%);
+    background-size: 400% 100%; animation: shimmer 1.6s infinite linear;
+  }
+  .skeleton i:nth-child(1) { width: 94%; }
+  .skeleton i:nth-child(2) { width: 80%; animation-delay: .12s; }
+  .skeleton i:nth-child(3) { width: 58%; animation-delay: .24s; }
+  .mock__gen { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
+  .mock__stop { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid #3a3a34; border-radius: 50%; }
+  .mock__stop i { width: 8px; height: 8px; background: #d6d6cf; border-radius: 2px; }
+  .mock__genlabel { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #77776f; animation: pulse 1.8s infinite; }
+  .adcard {
+    position: absolute; right: 16px; bottom: 16px; width: 290px; max-width: calc(100% - 32px);
+    background: #fff; color: #1d1d1b; border-radius: 12px; padding: 30px 16px 15px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.38); overflow: hidden;
+  }
+  .adcard__label { position: absolute; top: 9px; left: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a94; }
+  .adcard__earn { position: absolute; top: 8px; right: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #187a33; }
+  .adcard__h { font-size: 14px; font-weight: 600; letter-spacing: -0.1px; margin-bottom: 4px; }
+  .adcard__b { font-size: 12.5px; color: #6b6b66; line-height: 1.45; }
+  .adcard__bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #f0f0ec; }
+  .adcard__bar i { display: block; height: 100%; width: 64%; background: #187a33; }
+  .mock__caption { margin-top: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94; }
+
+  /* dark band */
+  .band { background: #161614; color: #ececea; text-align: center; }
+  .band__inner { max-width: 900px; margin: 0 auto; padding: 96px 32px; }
+  .band h2 { font-size: clamp(30px, 3.9vw, 46px); line-height: 1.12; margin: 16px auto 30px; color: #fff; max-width: 22ch; text-wrap: balance; }
+  .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 26px; }
+  .pill { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.04em; color: #ececea; background: #1d1d1a; border: 1px solid #2c2c28; border-radius: 999px; padding: 9px 16px; }
+  .pill--accent { color: #57c07a; background: #12271a; border-color: #1f3f2a; }
+  .band p { font-size: 15.5px; line-height: 1.7; color: #a3a39b; margin: 0 auto; max-width: 52ch; }
+
+  /* pricing */
+  .price { text-align: center; }
+  .price__inner { max-width: 1120px; margin: 0 auto; padding: 88px 32px; }
+  .price h2 { font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; margin: 12px 0 10px; }
+  .price__sub { font-size: 16.5px; line-height: 1.6; color: #55554f; max-width: 56ch; margin: 0 auto 40px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 24px; max-width: 860px; margin: 0 auto; text-align: left; align-items: stretch; }
+  .card { background: #fff; border: 1px solid #e7e7e2; border-radius: 14px; padding: 30px; display: flex; flex-direction: column; }
+  .card--main { border-color: #187a33; }
+  .card__head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .card__kind { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b8b84; }
+  .card--main .card__kind { color: #187a33; }
+  .card__tag { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #187a33; background: rgba(24,122,51,0.10); border-radius: 999px; padding: 4px 10px; }
+  .card__price { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 40px; color: #1d1d1b; letter-spacing: -0.02em; margin: 12px 0 2px; }
+  .card__meta { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12.5px; color: #55554f; margin-bottom: 22px; }
+  .ticks { list-style: none; padding: 0; margin: 0; }
+  .ticks li { position: relative; padding-left: 20px; margin-bottom: 10px; font-size: 14.5px; color: #45453f; }
+  .ticks li:last-child { margin-bottom: 0; }
+  .ticks li::before { content: ""; position: absolute; left: 0; top: 8px; width: 7px; height: 7px; border-radius: 50%; background: #187a33; }
+  .price__note { margin: 24px 0 0; font-size: 14px; color: #8b8b84; }
+  .price__note a { text-decoration: none; border-bottom: 1px solid #cfe5d6; }
+
+  /* booking */
+  .book { background: #161614; color: #ececea; }
+  .book__inner { max-width: 600px; margin: 0 auto; padding: 88px 32px; text-align: center; }
+  .book h2 { font-size: clamp(34px, 4.5vw, 54px); line-height: 1.05; margin: 12px 0 32px; color: #fff; }
+  .form { background: #1d1d1a; border: 1px solid #2c2c28; border-radius: 14px; padding: 26px; text-align: left; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b8b84; margin-bottom: 7px; }
+  .field input, .field select, .field textarea {
+    width: 100%; font-family: inherit; font-size: 14.5px; color: #1d1d1b;
+    background: #fff; border: 1px solid #e7e7e2; border-radius: 9px; padding: 11px 13px;
+  }
+  .field textarea { min-height: 84px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #187a33; }
+  .select { position: relative; }
+  .select select { padding-right: 30px; appearance: none; -webkit-appearance: none; cursor: pointer; }
+  .select svg { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .status { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #8f8f88; margin: 0; min-height: 0; }
+  .status:not(:empty) { margin-top: 12px; }
+
+  .marquee-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+  .marquee { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* footer */
+  .foot { border-top: 1px solid #e7e7e2; }
+  .foot__inner { margin: 0 auto; padding: 12px 32px 14px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
+  .foot__inner a { color: #8b8b84; text-decoration: none; }
+  .foot__inner a:hover { color: #1d1d1b; }
+  .foot .brand { color: #1d1d1b; }
+  .foot .brand span:last-child { font-size: 13px; }
+
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .skeleton i, .mock__genlabel { animation: none !important; }
+  }
+  @media (max-width: 640px) {
+    .nav__links { display: none; }
+    .hero__top { padding-top: 56px; }
+    .band__inner, .price__inner, .book__inner { padding-top: 64px; padding-bottom: 64px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner">
+      <a class="brand" href="/">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span>AdWait</span>
+      </a>
+      <div class="nav__links">
+        <a href="#price">Pricing</a>
+      </div>
+      <a class="btn btn--sm" href="#book">Book a pilot</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero__top">
+      <div class="eyebrow">For advertisers</div>
+      <h1 class="serif">Own the pause before the <em>answer.</em></h1>
+      <p class="hero__sub">One clearly labeled ad, in eleven AI tools, shown only while the model is generating. Billed on viewable impressions — never on ads that were served but never seen.</p>
+      <div class="hero__cta">
+        <a class="btn" href="#book">Book a pilot</a>
+        <a class="textlink" href="#price">See rates ↓</a>
+      </div>
+    </div>
+
+    <div class="mock__frame">
+      <div class="mock" role="img" aria-label="A chat window generating a response with the AdWait ad card in the corner.">
+        <div class="mock__bar">
+          <i></i><i></i><i></i>
+          <span class="mock__url">chatgpt.com</span>
+          <span class="mock__on"><i></i>ADWAIT ON</span>
+        </div>
+        <div class="mock__body">
+          <div class="mock__q">Draft the launch plan, then rewrite it for the exec review.</div>
+          <div class="mock__a">Here's the launch plan, structured in three phases —</div>
+          <div class="skeleton"><i></i><i></i><i></i></div>
+          <div class="mock__gen">
+            <span class="mock__stop"><i></i></span>
+            <span class="mock__genlabel">Generating…</span>
+          </div>
+        </div>
+        <div class="adcard">
+          <span class="adcard__label">Ad · AdWait</span>
+          <span class="adcard__earn">+ $0.0040</span>
+          <div class="adcard__h">Your headline goes here</div>
+          <div class="adcard__b">One line of body copy, your logo or image, and a click through to your site.</div>
+          <div class="adcard__bar"><i></i></div>
+        </div>
+      </div>
+      <div class="mock__caption">One labeled ad while the model writes — response ends, ad vanishes.</div>
+    </div>
+
+    <div style="border-top: 1px solid #e7e7e2; padding: 16px 0; margin-top: 52px; display: flex; align-items: center;">
+      <span style="flex: none; padding-left: max(32px, calc((100% - 1120px) / 2 + 32px)); padding-right: 32px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">RUNS ON</span>
+      <div class="marquee-wrap" style="flex: 1 1 0; min-width: 0;">
+        <div class="marquee">
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/chatgpt.svg" alt="" width="15" height="15" style="display: block;">ChatGPT</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/grok.svg" alt="" width="15" height="15" style="display: block;">Grok</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><span style="width: 18px; height: 18px; border-radius: 5px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 9px;">44</span>Base44</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/chatgpt.svg" alt="" width="15" height="15" style="display: block;">ChatGPT</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/grok.svg" alt="" width="15" height="15" style="display: block;">Grok</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><span style="width: 18px; height: 18px; border-radius: 5px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 9px;">44</span>Base44</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="band">
+    <div class="band__inner">
+      <div class="eyebrow eyebrow--dark">What you're buying</div>
+      <h2 class="serif">One labeled ad, billed only on impressions that were <em>actually seen.</em></h2>
+      <div class="pills">
+        <span class="pill">≥ 50% visible</span>
+        <span class="pill">≥ 1 continuous second</span>
+        <span class="pill">Active browser tab</span>
+        <span class="pill pill--accent">IAB standard</span>
+      </div>
+      <p>Served-but-unseen never bills. Every impression on your invoice cleared the bar above.</p>
+    </div>
+  </section>
+
+  <section class="price" id="price">
+    <div class="price__inner">
+      <div class="eyebrow">Rate card</div>
+      <h2 class="serif">Two ways to <em>run.</em></h2>
+      <p class="price__sub">Prepaid, billed on viewable impressions only. Run a text-only card at $4 CPM, or the full image placement at $8 CPM. Nothing auto-renews, nothing expires.</p>
+      <div class="cards">
+        <div class="card card--main">
+          <div class="card__head">
+            <span class="card__kind">Image ad · $8 CPM</span>
+            <span class="card__tag">Main</span>
+          </div>
+          <div class="card__price">$200</div>
+          <div class="card__meta">25,000 viewable impressions · full creative</div>
+          <ul class="ticks">
+            <li>Your logo or image, plus headline and body.</li>
+            <li>Room to rotate two creatives and compare.</li>
+            <li>Full reach and frequency reporting at completion.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card__head">
+            <span class="card__kind">Text ad · $4 CPM</span>
+          </div>
+          <div class="card__price">From $100</div>
+          <div class="card__meta">Text-only card — no image</div>
+          <ul class="ticks">
+            <li>Your headline and one line of body — no image required.</li>
+            <li>Half the CPM of the image placement.</li>
+            <li>$100 minimum. Same targeting and reporting.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="price__note">Larger volumes or exclusive launch-window placement: <a href="mailto:ads@adwait.io">ads@adwait.io</a>.</p>
+    </div>
+  </section>
+
+  <section class="book" id="book">
+    <div class="book__inner">
+      <div class="eyebrow eyebrow--dark">Book a pilot</div>
+      <h2 class="serif">Tell us what you sell.</h2>
+      <form class="form" id="pilot-form" novalidate>
+        <div class="field">
+          <label for="f-co">Company</label>
+          <input id="f-co" name="company" type="text" autocomplete="organization" placeholder="Acme Inc.">
+        </div>
+        <div class="field">
+          <label for="f-url">Website</label>
+          <input id="f-url" name="website" type="text" inputmode="url" placeholder="acme.com">
+        </div>
+        <div class="field">
+          <label for="f-tier">Placement</label>
+          <div class="select">
+            <select id="f-tier" name="placement">
+              <option value="Image ad, $200 — 25,000 viewable impressions at $8 CPM">Image ad — $200</option>
+              <option value="Text ad, from $100 — $4 CPM, text only">Text ad — from $100</option>
+              <option value="Larger or custom volume, please quote">Larger or custom, please quote</option>
+              <option value="Not sure yet, would like advice">Not sure yet</option>
+            </select>
+            <svg viewBox="0 0 12 12" width="12" height="12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="#8b8b84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-notes">Anything else</label>
+          <textarea id="f-notes" name="notes" placeholder="Timing, audience, what a win looks like."></textarea>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="f-hp">Fax</label>
+          <input id="f-hp" name="fax" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <button class="btn btn--block" type="button" id="btn-compose">Compose email</button>
+        <button class="btn btn--block btn--ghost" type="button" id="btn-copy">Copy details instead</button>
+        <p class="status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot__inner">
+      <a class="brand" href="/">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span>AdWait</span>
+      </a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/payment-support">Payments</a>
+      <a href="mailto:support@adwait.io">support@adwait.io</a>
+      <span>© 2026 AdWait</span>
+    </div>
+  </footer>
+
+<script>
+(function () {
+  var TO = "ads@adwait.io";
+  var statusEl = document.getElementById("form-status");
+  var val = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
+  var setStatus = function (msg) { statusEl.textContent = msg; };
+
+  function collect() {
+    return {
+      company: val("f-co"),
+      url: val("f-url"),
+      tier: val("f-tier"),
+      notes: val("f-notes"),
+      trap: val("f-hp")
+    };
+  }
+
+  function body(d) {
+    return "Company: " + (d.company || "-") +
+      "\nWebsite: " + (d.url || "-") +
+      "\nPlacement: " + d.tier +
+      "\n\nNotes:\n" + (d.notes || "-") +
+      "\n\n(Sent from adwait.io/advertise)";
+  }
+
+  function invalid(d) {
+    if (d.trap) return "Something went wrong. Please email " + TO + " directly.";
+    if (!d.company && !d.url) return "Add a company or a website so we know who you are.";
+    return null;
+  }
+
+  function subject(d) {
+    return "Advertising on AdWait" + (d.company ? " - " + d.company : "");
+  }
+
+  document.getElementById("btn-compose").addEventListener("click", function () {
+    var d = collect(), err = invalid(d);
+    if (err) return setStatus(err);
+    window.location.href = "mailto:" + TO +
+      "?subject=" + encodeURIComponent(subject(d)) +
+      "&body=" + encodeURIComponent(body(d));
+    setStatus('Opening your mail client. If nothing happens, use "Copy details instead".');
+  });
+
+  document.getElementById("btn-copy").addEventListener("click", function () {
+    var d = collect(), err = invalid(d);
+    if (err) return setStatus(err);
+    var text = "To: " + TO + "\nSubject: " + subject(d) + "\n\n" + body(d);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { setStatus("Copied. Paste it into an email to " + TO + "."); },
+        function () { setStatus("Copy failed. Email " + TO + " directly."); }
+      );
+    } else {
+      setStatus("Copy unavailable here. Email " + TO + " directly.");
+    }
+  });
+})();
+</script>
+</body>
+</html>
