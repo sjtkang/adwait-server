@@ -52,6 +52,7 @@
   .btn:hover { background: #14672b; color: #fff; }
   .btn--sm { border-radius: 9px; padding: 10px 18px; font-size: 12px; letter-spacing: 0.06em; }
   .btn--block { display: block; width: 100%; padding: 15px 26px; font-size: 13px; }
+  .btn--block + .btn--block { margin-top: 10px; }
   .btn--ghost { background: transparent; color: #ececea; border: 1px solid #32322c; }
   .btn--ghost:hover { background: transparent; color: #ececea; border-color: #57c07a; }
   .textlink { color: #55554f; text-decoration: none; font-size: 14.5px; border-bottom: 1px solid #d9d9d4; }
@@ -104,16 +105,6 @@
   .adcard__bar i { display: block; height: 100%; width: 64%; background: #187a33; }
   .mock__caption { margin-top: 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94; }
 
-  /* runs-on strip */
-  .runs {
-    max-width: 1120px; margin: 52px auto 0; padding: 24px 32px;
-    border-top: 1px solid #e7e7e2; border-bottom: 1px solid #e7e7e2;
-    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 36px; row-gap: 16px;
-  }
-  .runs__label { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94; }
-  .runs span.tool { display: inline-flex; align-items: center; gap: 9px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; color: #55554f; }
-  .runs .more { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13px; color: #8b8b84; }
-
   /* dark band */
   .band { background: #161614; color: #ececea; text-align: center; }
   .band__inner { max-width: 900px; margin: 0 auto; padding: 96px 32px; }
@@ -161,11 +152,16 @@
   .select select { padding-right: 30px; appearance: none; -webkit-appearance: none; cursor: pointer; }
   .select svg { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .status { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #8f8f88; margin: 12px 0 0; min-height: 16px; }
+  .status { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; color: #8f8f88; margin: 0; min-height: 0; }
+  .status:not(:empty) { margin-top: 12px; }
+
+  .marquee-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+  .marquee { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
 
   /* footer */
   .foot { border-top: 1px solid #e7e7e2; }
-  .foot__inner { margin: 0 auto; padding: 14px 32px 16px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
+  .foot__inner { margin: 0 auto; padding: 12px 32px 14px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
   .foot__inner a { color: #8b8b84; text-decoration: none; }
   .foot__inner a:hover { color: #1d1d1b; }
   .foot .brand { color: #1d1d1b; }
@@ -237,17 +233,30 @@
       <div class="mock__caption">One labeled ad while the model writes — response ends, ad vanishes.</div>
     </div>
 
-    <div class="runs">
-      <span class="runs__label">Runs on</span>
-      <span class="tool"><img src="assets/chatgpt.svg" alt="" width="15" height="15">ChatGPT</span>
-      <span class="tool"><img src="assets/claude.svg" alt="" width="15" height="15">Claude</span>
-      <span class="tool"><img src="assets/gemini.svg" alt="" width="15" height="15">Gemini</span>
-      <span class="tool"><img src="assets/perplexity.svg" alt="" width="15" height="15">Perplexity</span>
-      <span class="tool"><img src="assets/grok.svg" alt="" width="15" height="15">Grok</span>
-      <span class="tool"><img src="assets/deepseek.svg" alt="" width="15" height="15">DeepSeek</span>
-      <span class="tool"><img src="assets/copilot.svg" alt="" width="15" height="15">Copilot</span>
-      <span class="tool"><img src="assets/replit.svg" alt="" width="15" height="15">Replit</span>
-      <span class="more">+ Base44</span>
+    <div style="border-top: 1px solid #e7e7e2; padding: 16px 0; margin-top: 52px; display: flex; align-items: center;">
+      <span style="flex: none; padding-left: max(32px, calc((100% - 1120px) / 2 + 32px)); padding-right: 32px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a94;">RUNS ON</span>
+      <div class="marquee-wrap" style="flex: 1 1 0; min-width: 0;">
+        <div class="marquee">
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/chatgpt.svg" alt="" width="15" height="15" style="display: block;">ChatGPT</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/grok.svg" alt="" width="15" height="15" style="display: block;">Grok</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+          <span style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><span style="width: 18px; height: 18px; border-radius: 5px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 9px;">44</span>Base44</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/chatgpt.svg" alt="" width="15" height="15" style="display: block;">ChatGPT</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/claude.svg" alt="" width="15" height="15" style="display: block;">Claude</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/gemini.svg" alt="" width="15" height="15" style="display: block;">Gemini</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/perplexity.svg" alt="" width="15" height="15" style="display: block;">Perplexity</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/grok.svg" alt="" width="15" height="15" style="display: block;">Grok</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/deepseek.svg" alt="" width="15" height="15" style="display: block;">DeepSeek</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/copilot.svg" alt="" width="15" height="15" style="display: block;">Copilot</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><img src="assets/replit.svg" alt="" width="15" height="15" style="display: block;">Replit</span>
+          <span aria-hidden="true" style="display: inline-flex; align-items: center; gap: 11px; margin-right: 60px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 13.5px; color: #55554f; white-space: nowrap;"><span style="width: 18px; height: 18px; border-radius: 5px; background: #55554f; color: #fbfbf9; display: inline-flex; align-items: center; justify-content: center; font-size: 9px;">44</span>Base44</span>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -347,10 +356,10 @@
         <span class="dots"><i></i><i></i><i></i></span>
         <span>AdWait</span>
       </a>
-      <a href="/">For users</a>
       <a href="/privacy">Privacy</a>
-      <a href="/terms" class="footlink">Terms</a>
-      <a href="mailto:ads@adwait.io">ads@adwait.io</a>
+      <a href="/terms">Terms</a>
+      <a href="/payment-support">Payments</a>
+      <a href="mailto:support@adwait.io">support@adwait.io</a>
       <span>© 2026 AdWait</span>
     </div>
   </footer>

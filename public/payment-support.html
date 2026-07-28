@@ -1,58 +1,127 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>How payments work — AdWait</title>
-    <meta name="description" content="How AdWait payouts work: the $5 minimum, email payouts (PayPal, Venmo, Cash App, bank, Visa) and USDC on Base, and what happens after you request a cash-out.">
-    <link rel="canonical" href="https://adwait.io/payment-support">
-    <style>
-      body { max-width: 720px; margin: 40px auto; padding: 0 20px 60px; font-family: system-ui, -apple-system, sans-serif; color: #1a1a1a; line-height: 1.6; }
-      h1 { font-size: 24px; margin-bottom: 4px; }
-      .sub { color: #666; font-size: 13px; margin-bottom: 28px; }
-      h2 { font-size: 16px; margin: 28px 0 8px; }
-      p, li { font-size: 14.5px; }
-      ul { padding-left: 22px; }
-      .summary { background: #f4f7f4; border: 1px solid #dbe6db; border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
-      .summary strong { display: block; margin-bottom: 6px; font-size: 14px; }
-      a { color: #187a33; }
-    </style>
-  </head>
-  <body>
-    <h1>How payments work</h1>
-    <p class="sub">AdWait — the short, honest version of where your money comes from and how it reaches you.</p>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How payments work — AdWait</title>
+<meta name="description" content="How AdWait payouts work: the $5 minimum, email payouts (PayPal, Venmo, Cash App, bank, Visa) and USDC on Base, and what happens after you request a cash-out.">
+<link rel="canonical" href="https://adwait.io/payment-support">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/logo/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; background: #fbfbf9; }
+  body { margin: 0; background: #fbfbf9; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+         font-family: system-ui, -apple-system, sans-serif; color: #1d1d1b; font-size: 16px; line-height: 1.65; }
+  * { box-sizing: border-box; }
+  ::selection { background: #187a33; color: #fff; }
+  :focus-visible { outline: 2px solid #187a33; outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 32px; }
+  .wrap.wide { max-width: 1120px; }
+  .mono { font-family: 'Fragment Mono', ui-monospace, monospace; }
+  .eyebrow { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.16em;
+             text-transform: uppercase; color: #187a33; }
+  h1 { font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: clamp(36px, 4.4vw, 56px);
+       line-height: 1.04; letter-spacing: -0.03em; margin: 0; }
+  h2 { font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 24px; letter-spacing: -0.01em;
+       margin: 44px 0 10px; }
+  p, li { font-size: 15.5px; color: #45453f; }
+  p { margin: 0 0 14px; }
+  ul { padding-left: 20px; margin: 0 0 14px; }
+  li { margin-bottom: 8px; }
+  a { color: #187a33; }
+  strong { color: #1d1d1b; }
+  nav { border-bottom: 1px solid #e7e7e2; }
+  .nav-in { display: flex; align-items: center; gap: 24px; padding: 18px 0; min-height: 40px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: #1d1d1b; text-decoration: none; }
+  .dots { display: inline-flex; align-items: center; gap: 4px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; }
+  .navlink { color: #6f6f68; text-decoration: none; font-size: 13.5px; }
+  .navlink:hover { color: #1d1d1b; }
+  .summary { border: 1px solid #e7e7e2; background: #ffffff; border-radius: 12px; padding: 18px 22px; margin: 34px 0 8px; }
+  .summary strong { display: block; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 11px;
+                    letter-spacing: 0.1em; text-transform: uppercase; color: #187a33; margin-bottom: 10px; }
+  .summary ul { margin: 0; }
+  .summary li { font-size: 14.5px; }
+  .summary li:last-child { margin-bottom: 0; }
+  footer { border-top: 1px solid #e7e7e2; margin-top: 72px; }
+  .foot-in { display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap;
+             padding: 12px 32px 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
+  .foot-in a { color: #8b8b84; text-decoration: none; }
+  .foot-in a:hover { color: #1d1d1b; }
+  @media (max-width: 640px) { .navlink { display: none; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
 
-    <div class="summary">
-      <strong>At a glance</strong>
-      <ul>
-        <li>You earn a 50% share of what the advertiser paid, per genuinely viewed ad.</li>
-        <li>Cash out from the popup once your balance reaches $5 — by email (redeemable as PayPal, Venmo, Cash App, bank transfer, or Virtual Visa) or USDC (Base).</li>
-        <li>Requests are reviewed and paid within about 3 days. Fees may apply depending on the method.</li>
-      </ul>
-    </div>
+<nav><div class="wrap wide nav-in">
+  <a class="brand" href="/">
+    <span class="dots"><i style="background:#c9c9c2"></i><i style="background:#9a9a94"></i><i style="background:#187a33"></i></span>
+    <span class="mono" style="font-size:15px; letter-spacing:0.08em;">AdWait</span>
+  </a>
+  <div style="margin-left:auto; display:flex; gap:22px; flex-wrap:wrap;">
+    <a class="navlink" href="/privacy">Privacy</a>
+    <a class="navlink" href="/terms">Terms</a>
+    <a class="navlink" href="/advertise">Advertise</a>
+  </div>
+</div></nav>
 
-    <h2>How you earn</h2>
-    <p>While an AI response is generating on a supported site, AdWait shows one clearly labeled ad. A view counts when the ad is at least half visible in an active tab for at least one second — the industry viewability standard. Each counted view credits you 50% of that campaign's rate. For example, a campaign paying $4 per 1,000 views credits you $0.002 per view. If no campaign is live, the card says so and nothing accrues.</p>
+<header><div class="wrap" style="padding-top:56px;">
+  <div class="eyebrow">Payouts, in plain words</div>
+  <h1 style="margin:18px 0 16px;">How payments work</h1>
+  <p style="max-width:62ch;">AdWait — the short, honest version of where your money comes from and how it reaches you.</p>
+</div></header>
 
-    <h2>Estimates and verification</h2>
-    <p>The balance in your popup is an estimate. Advertisers independently verify the views they pay for, and final figures are reconciled against those verified counts. This is why payouts include a review window rather than being instant.</p>
+<main><div class="wrap">
 
-    <h2>Cashing out</h2>
-    <p>When your available balance reaches the $5 minimum, the Cash out tab lets you request a payout of your full available balance. You choose a destination at that moment — an email address (your payout arrives as a Tremendous reward link you redeem as PayPal, Venmo, Cash App, bank transfer, or a Virtual Visa card) or a USDC wallet address on the Base network. You can have several requests under review at once — each new request needs a further $5 of newly accrued balance, with a short pause between requests. While requests are pending, your available balance shows only what has accrued since.</p>
+  <div class="summary">
+    <strong>At a glance</strong>
+    <ul>
+      <li>You earn a 50% share of what the advertiser paid, per genuinely viewed ad.</li>
+      <li>Cash out from the popup once your balance reaches $5 — by email (redeemable as PayPal, Venmo, Cash App, bank transfer, or Virtual Visa) or USDC (Base).</li>
+      <li>Requests are reviewed and paid within about 3 days. Fees may apply depending on the method.</li>
+    </ul>
+  </div>
 
-    <h2>Timing and fees</h2>
-    <p>Requests are reviewed and paid after a reconciliation window of up to roughly 3 days. For email payouts, Tremendous's delivery fee is deducted from your claimed balance; for USDC, blockchain network fees may reduce the amount received.</p>
+  <h2>How you earn</h2>
+  <p>While an AI response is generating on a supported site, AdWait shows one clearly labeled ad. A view counts when the ad is at least half visible in an active tab for at least one second — the industry viewability standard. Each counted view credits you 50% of that campaign's rate. For example, a campaign paying $4 per 1,000 views credits you $0.002 per view. If no campaign is live, the card says so and nothing accrues.</p>
 
-    <h2>If you choose USDC</h2>
-    <p>Double-check the wallet address and make sure it can receive USDC on Base specifically. Crypto transfers are irreversible — a payment sent to a wrong or incompatible address cannot be recovered.</p>
+  <h2>Estimates and verification</h2>
+  <p>The balance in your popup is an estimate. Advertisers independently verify the views they pay for, and final figures are reconciled against those verified counts. This is why payouts include a review window rather than being instant.</p>
 
-    <h2>Your earnings key</h2>
-    <p>Your balance is tied to a random key stored in your browser — no account exists. The popup's Cash out tab lets you copy this earnings key; pasting it into a fresh install restores your balance on a new browser or computer. Treat the key like a password: anyone holding it can direct that balance at cash-out. If you uninstall without saving it, the balance cannot be recovered.</p>
+  <h2>Cashing out</h2>
+  <p>When your available balance reaches the $5 minimum, the Cash out tab lets you request a payout of your full available balance. You choose a destination at that moment — an email address (your payout arrives as a Tremendous reward link you redeem as PayPal, Venmo, Cash App, bank transfer, or a Virtual Visa card) or a USDC wallet address on the Base network. You can have several requests under review at once — each new request needs a further $5 of newly accrued balance, with a short pause between requests. While requests are pending, your available balance shows only what has accrued since.</p>
 
-    <h2>If a request is rejected</h2>
-    <p>The amount returns to your available balance automatically — nothing is lost. Requests are typically rejected when verification doesn't match or activity looks automated. If you believe a rejection was a mistake, contact us and include your earnings key.</p>
+  <h2>Timing and fees</h2>
+  <p>Requests are reviewed and paid after a reconciliation window of up to roughly 3 days. For email payouts, Tremendous's delivery fee is deducted from your claimed balance; for USDC, blockchain network fees may reduce the amount received.</p>
 
-    <h2>Questions</h2>
-    <p>Email <a href="mailto:support@adwait.io">support@adwait.io</a>. For what data we handle, see the <a href="/privacy">privacy policy</a>.</p>
-  </body>
+  <h2>If you choose USDC</h2>
+  <p>Double-check the wallet address and make sure it can receive USDC on Base specifically. Crypto transfers are irreversible — a payment sent to a wrong or incompatible address cannot be recovered.</p>
+
+  <h2>Your earnings key</h2>
+  <p>Your balance is tied to a random key stored in your browser — no account exists. The popup's Cash out tab lets you copy this earnings key; pasting it into a fresh install restores your balance on a new browser or computer. Treat the key like a password: anyone holding it can direct that balance at cash-out. If you uninstall without saving it, the balance cannot be recovered.</p>
+
+  <h2>If a request is rejected</h2>
+  <p>The amount returns to your available balance automatically — nothing is lost. Requests are typically rejected when verification doesn't match or activity looks automated. If you believe a rejection was a mistake, contact us and include your earnings key.</p>
+
+  <h2>Questions</h2>
+  <p>Email <a href="mailto:support@adwait.io">support@adwait.io</a>. For what data we handle, see the <a href="/privacy">privacy policy</a>.</p>
+
+</div></main>
+
+<footer><div class="foot-in">
+  <a class="brand" href="/">
+    <span class="dots"><i style="background:#c9c9c2"></i><i style="background:#9a9a94"></i><i style="background:#187a33"></i></span>
+    <span class="mono" style="font-size:13px; letter-spacing:0.08em;">AdWait</span>
+  </a>
+  <a href="/advertise">Advertise</a>
+  <a href="/privacy">Privacy</a>
+  <a href="/terms">Terms</a>
+  <a href="mailto:support@adwait.io">support@adwait.io</a>
+  <span>© 2026 AdWait</span>
+</div></footer>
+
+</body>
 </html>

@@ -34,7 +34,7 @@
   a { color: #187a33; }
   strong { color: #1d1d1b; }
   nav { border-bottom: 1px solid #e7e7e2; }
-  .nav-in { display: flex; align-items: center; gap: 24px; padding: 18px 0; }
+  .nav-in { display: flex; align-items: center; gap: 24px; padding: 18px 0; min-height: 40px; }
   .brand { display: inline-flex; align-items: center; gap: 10px; color: #1d1d1b; text-decoration: none; }
   .dots { display: inline-flex; align-items: center; gap: 4px; }
   .dots i { width: 7px; height: 7px; border-radius: 50%; }
@@ -46,7 +46,7 @@
   .callout p { margin: 0; font-size: 14.5px; }
   footer { border-top: 1px solid #e7e7e2; margin-top: 72px; }
   .foot-in { display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap;
-             padding: 22px 0 40px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
+             padding: 12px 32px 14px; font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 12px; color: #8b8b84; }
   .foot-in a { color: #8b8b84; text-decoration: none; }
   .foot-in a:hover { color: #1d1d1b; }
   @media (max-width: 640px) { .navlink { display: none; } }
@@ -156,15 +156,14 @@
 
 </div></main>
 
-<footer><div class="wrap wide foot-in">
+<footer><div class="foot-in">
   <a class="brand" href="/">
     <span class="dots"><i style="background:#c9c9c2"></i><i style="background:#9a9a94"></i><i style="background:#187a33"></i></span>
     <span class="mono" style="font-size:13px; letter-spacing:0.08em;">AdWait</span>
   </a>
   <a href="/advertise">Advertise</a>
   <a href="/privacy">Privacy</a>
-  <a href="/terms">Terms</a>
-  <a href="/payment-support">How payments work</a>
+  <a href="/payment-support">Payments</a>
   <a href="mailto:support@adwait.io">support@adwait.io</a>
   <span>© 2026 AdWait</span>
 </div></footer>
