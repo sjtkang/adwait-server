@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived, issueServeToken, InvalidServeTokenError, getPayoutSummary, createPayoutClaim, PayoutClaimError, listClaims, resolveClaim } from './db';
+import { init, pickEligibleAd, recordImpression, getStats, getEarnings, createCampaign, listCampaigns, updateCampaign, addPurchasedImpressions, deleteCampaign, setArchived, issueServeToken, InvalidServeTokenError, getPayoutSummary, createPayoutClaim, PayoutClaimError, listClaims, resolveClaim, createAdvertiserInquiry, listAdvertiserInquiries } from './db';
 import { type AdFormat } from './ads';
 import { uploadAdFile, isAllowedAdMime, storageConfigured, readImageSize, MAX_IMAGE_DIMENSION } from './storage';
 
@@ -152,6 +152,68 @@ app.get('/privacy', (_req, res) => { res.sendFile(path.join(process.cwd(), 'publ
 app.get('/terms', (_req, res) => res.sendFile(path.join(process.cwd(), 'public', 'terms.html')));
 app.get('/payment-support', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'payment-support.html')); });
 app.get('/advertise', (_req, res) => res.sendFile(path.join(process.cwd(), 'public', 'advertise.html')));
+
+// ── Advertiser inquiries: stored in Postgres first, emailed second ─────────
+// A notification failure must never lose a lead. Defenses (Turnstile is
+// deliberately off): honeypot field, 5-per-hour per-IP cap, strict length
+// caps, server-side validation only.
+const INQUIRY_WINDOW_MS = 60 * 60 * 1000;
+const INQUIRY_MAX_PER_WINDOW = 5;
+const inquiryHits = new Map<string, number[]>();
+function inquiryRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const hits = (inquiryHits.get(ip) ?? []).filter((t) => now - t < INQUIRY_WINDOW_MS);
+  if (hits.length >= INQUIRY_MAX_PER_WINDOW) { inquiryHits.set(ip, hits); return true; }
+  hits.push(now); inquiryHits.set(ip, hits); return false;
+}
+const inquiryField = (v: unknown, max: number): string => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+
+async function notifyInquiry(i: { company: string; website: string; email: string; tier: string; notes: string }) {
+  const apiKey = process.env.SMTP2GO_API_KEY;
+  if (!apiKey) { console.warn('[inquiry] SMTP2GO_API_KEY not set: inquiry stored but not emailed'); return; }
+  const to = process.env.INQUIRY_TO ?? 'ads@adwait.io';
+  const from = process.env.INQUIRY_FROM ?? 'noreply@adwait.io';
+  const text = [
+    `Company:  ${i.company || '-'}`,
+    `Website:  ${i.website || '-'}`,
+    `Email:    ${i.email}`,
+    `Placement: ${i.tier || '-'}`,
+    '', 'Notes:', i.notes || '-', '',
+    'Reply directly to this email to reach them.',
+  ].join('\n');
+  try {
+    const r = await fetch('https://api.smtp2go.com/v3/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Smtp2go-Api-Key': apiKey },
+      body: JSON.stringify({
+        sender: from, to: [to],
+        subject: `Pilot inquiry: ${i.company || i.website || i.email}`,
+        text_body: text,
+        custom_headers: [{ header: 'Reply-To', value: i.email }],
+      }),
+    });
+    if (!r.ok) console.error('[inquiry] SMTP2GO error', r.status, await r.text());
+  } catch (err) { console.error('[inquiry] email notification failed', err); }
+}
+
+app.post('/api/advertise-inquiry', ah(async (req, res) => {
+  const b = (req.body ?? {}) as Record<string, unknown>;
+  if (inquiryField(b.fax, 50)) { res.json({ ok: true }); return; } // honeypot: silent success
+  const ip = (req.header('cf-connecting-ip') || req.ip || 'unknown').toString();
+  if (inquiryRateLimited(ip)) { res.status(429).json({ error: 'Too many requests. Please email ads@adwait.io directly.' }); return; }
+  const email = inquiryField(b.email, 200).toLowerCase();
+  const company = inquiryField(b.company, 200);
+  const website = inquiryField(b.website, 300);
+  const tier = inquiryField(b.tier, 200);
+  const notes = inquiryField(b.notes, 4000);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { res.status(400).json({ error: 'A valid email address is required.' }); return; }
+  if (!company && !website) { res.status(400).json({ error: 'Add a company or a website so we know who you are.' }); return; }
+  await createAdvertiserInquiry({ company, website, email, tier, notes });
+  void notifyInquiry({ company, website, email, tier, notes });
+  res.json({ ok: true });
+}));
+
+app.get('/api/admin/inquiries', requireAdmin, ah(async (_req, res) => { res.json(await listAdvertiserInquiries()); }));
 app.get('/robots.txt', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'robots.txt')); });
 app.get('/sitemap.xml', (_req, res) => { res.sendFile(path.join(process.cwd(), 'public', 'sitemap.xml')); });
 
