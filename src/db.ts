@@ -39,7 +39,6 @@ export async function init(): Promise<void> {
       image_url TEXT, click_url TEXT NOT NULL,
       impressions_purchased INTEGER NOT NULL, impressions_served INTEGER NOT NULL DEFAULT 0,
       cpm DOUBLE PRECISION NOT NULL DEFAULT 0,
-      is_house BOOLEAN NOT NULL DEFAULT false,
       archived BOOLEAN NOT NULL DEFAULT false
     );`);
   await pool.query(`
@@ -50,7 +49,7 @@ export async function init(): Promise<void> {
   await pool.query(`ALTER TABLE impressions ADD COLUMN IF NOT EXISTS install_id TEXT`);
   await pool.query(`ALTER TABLE impressions ADD COLUMN IF NOT EXISTS cpm_at_view DOUBLE PRECISION`);
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS cpm DOUBLE PRECISION NOT NULL DEFAULT 0`);
-  await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS is_house BOOLEAN NOT NULL DEFAULT false`);
+  await pool.query(`ALTER TABLE campaigns DROP COLUMN IF EXISTS is_house`); // house/backfill tier removed July 2026
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_ad_id ON impressions(ad_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_install ON impressions(install_id)`);
@@ -80,9 +79,9 @@ export async function init(): Promise<void> {
     );`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_claims_install ON payout_claims(install_id)`);
 
-  // No seeded house ads: with zero eligible campaigns, /api/ad returns 204 and
+  // No house ads, period: with zero eligible campaigns, /api/ad returns 204 and
   // the overlay shows its out-of-ads message instead — earnings only ever come
-  // from real campaigns. (is_house stays in the schema for a future backfill tier.)
+  // from real, advertiser-funded campaigns.
 }
 
 // Weighted random by CPM (with a floor). Higher-paying ads win proportionally
@@ -114,21 +113,16 @@ export async function issueServeToken(adId: string, installId: string): Promise<
 
 export async function pickEligibleAd(format?: AdFormat, excludeId?: string): Promise<Ad | null> {
   const { rows } = await pool.query(
-    `SELECT id, format, headline, body, image_url, click_url, cpm, is_house
+    `SELECT id, format, headline, body, image_url, click_url, cpm
      FROM campaigns
      WHERE impressions_served < impressions_purchased AND archived = false AND ($1::text IS NULL OR format = $1)`,
     [format ?? null],
   );
   if (rows.length === 0) return null;
 
-  // Prefer paid campaigns; fall back to house/backfill ads only when no paid
-  // campaign is eligible — so we never hand paid inventory to a house ad.
-  const paid = rows.filter((r) => !r.is_house);
-  const tier = paid.length > 0 ? paid : rows;
-
-  // Don't repeat the last-shown ad unless it's the only candidate in this tier.
-  let candidates = excludeId ? tier.filter((r) => r.id !== excludeId) : tier;
-  if (candidates.length === 0) candidates = tier;
+  // Don't repeat the last-shown ad unless it's the only candidate.
+  let candidates = excludeId ? rows.filter((r) => r.id !== excludeId) : rows;
+  if (candidates.length === 0) candidates = rows;
 
   const row = weightedPick(candidates);
   const cpm = Number(row.cpm);
