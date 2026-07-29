@@ -53,6 +53,16 @@ export async function init(): Promise<void> {
   await pool.query(`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_ad_id ON impressions(ad_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_impressions_install ON impressions(install_id)`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS advertiser_inquiries (
+      id BIGSERIAL PRIMARY KEY,
+      company TEXT NOT NULL DEFAULT '',
+      website TEXT NOT NULL DEFAULT '',
+      email TEXT NOT NULL DEFAULT '',
+      tier TEXT NOT NULL DEFAULT '',
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );`);
 
   // One-time backfill for impressions recorded before the snapshot column
   // existed: price them at their campaign's CURRENT rate (the best available
@@ -342,4 +352,26 @@ export async function getStats() {
   );
   const campaigns = campRes.rows.map((c) => ({ ...c, frequency: c.reach > 0 ? Math.round((c.served / c.reach) * 10) / 10 : 0 }));
   return { impressions: Number(totals.count), totalViewableSeconds: Math.round(Number(totals.totalViewableMs) / 1000), campaigns };
+}
+
+
+// ── Advertiser inquiries (the /advertise booking form) ──────────────────────
+export interface AdvertiserInquiry {
+  company: string; website: string; email: string; tier: string; notes: string;
+}
+
+export async function createAdvertiserInquiry(i: AdvertiserInquiry) {
+  const { rows } = await pool.query(
+    `INSERT INTO advertiser_inquiries (company, website, email, tier, notes)
+     VALUES ($1,$2,$3,$4,$5) RETURNING id, created_at`,
+    [i.company, i.website, i.email, i.tier, i.notes],
+  );
+  return rows[0];
+}
+
+export async function listAdvertiserInquiries(limit = 200) {
+  const { rows } = await pool.query(
+    `SELECT * FROM advertiser_inquiries ORDER BY id DESC LIMIT $1`, [limit],
+  );
+  return rows;
 }

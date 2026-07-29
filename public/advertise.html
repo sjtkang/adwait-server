@@ -324,6 +324,10 @@
           <input id="f-url" name="website" type="text" inputmode="url" placeholder="acme.com">
         </div>
         <div class="field">
+          <label for="f-email">Your email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" placeholder="jane@acme.com" required>
+        </div>
+        <div class="field">
           <label for="f-tier">Placement</label>
           <div class="select">
             <select id="f-tier" name="placement">
@@ -343,8 +347,8 @@
           <label for="f-hp">Fax</label>
           <input id="f-hp" name="fax" type="text" tabindex="-1" autocomplete="off">
         </div>
-        <button class="btn btn--block" type="button" id="btn-compose">Compose email</button>
-        <button class="btn btn--block btn--ghost" type="button" id="btn-copy">Copy details instead</button>
+        <button class="btn btn--block" type="button" id="btn-send">Send</button>
+        <p class="status">By booking you agree to the <a href="/terms">terms</a>.</p>
         <p class="status" id="form-status" role="status" aria-live="polite"></p>
       </form>
     </div>
@@ -368,58 +372,48 @@
 (function () {
   var TO = "ads@adwait.io";
   var statusEl = document.getElementById("form-status");
+  var btn = document.getElementById("btn-send");
+  var form = document.getElementById("pilot-form");
   var val = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
   var setStatus = function (msg) { statusEl.textContent = msg; };
+  var EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
   function collect() {
-    return {
-      company: val("f-co"),
-      url: val("f-url"),
-      tier: val("f-tier"),
-      notes: val("f-notes"),
-      trap: val("f-hp")
-    };
+    return { company: val("f-co"), website: val("f-url"), email: val("f-email"),
+             tier: val("f-tier"), notes: val("f-notes"), fax: val("f-hp") };
   }
 
-  function body(d) {
-    return "Company: " + (d.company || "-") +
-      "\nWebsite: " + (d.url || "-") +
-      "\nPlacement: " + d.tier +
-      "\n\nNotes:\n" + (d.notes || "-") +
-      "\n\n(Sent from adwait.io/advertise)";
+  function done(d) {
+    form.innerHTML = "";
+    var h = document.createElement("p");
+    h.className = "eyebrow eyebrow--dark";
+    h.textContent = "Received";
+    var p1 = document.createElement("p");
+    p1.style.cssText = "font-size:16px;color:#ececea;margin:12px 0 8px;";
+    p1.textContent = "Thanks. Your inquiry is in.";
+    var p2 = document.createElement("p");
+    p2.style.cssText = "font-size:14px;color:#a3a39b;margin:0;";
+    p2.textContent = "You will get a reply at " + d.email + ", usually the same day, with an invoice and a creative checklist.";
+    form.appendChild(h); form.appendChild(p1); form.appendChild(p2);
   }
 
-  function invalid(d) {
-    if (d.trap) return "Something went wrong. Please email " + TO + " directly.";
-    if (!d.company && !d.url) return "Add a company or a website so we know who you are.";
-    return null;
-  }
-
-  function subject(d) {
-    return "Advertising on AdWait" + (d.company ? " - " + d.company : "");
-  }
-
-  document.getElementById("btn-compose").addEventListener("click", function () {
-    var d = collect(), err = invalid(d);
-    if (err) return setStatus(err);
-    window.location.href = "mailto:" + TO +
-      "?subject=" + encodeURIComponent(subject(d)) +
-      "&body=" + encodeURIComponent(body(d));
-    setStatus('Opening your mail client. If nothing happens, use "Copy details instead".');
-  });
-
-  document.getElementById("btn-copy").addEventListener("click", function () {
-    var d = collect(), err = invalid(d);
-    if (err) return setStatus(err);
-    var text = "To: " + TO + "\nSubject: " + subject(d) + "\n\n" + body(d);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(
-        function () { setStatus("Copied. Paste it into an email to " + TO + "."); },
-        function () { setStatus("Copy failed. Email " + TO + " directly."); }
-      );
-    } else {
-      setStatus("Copy unavailable here. Email " + TO + " directly.");
-    }
+  btn.addEventListener("click", function () {
+    var d = collect();
+    if (d.fax) { setStatus("Something went wrong. Please email " + TO + " directly."); return; }
+    if (!d.company && !d.website) { setStatus("Add a company or a website so we know who you are."); return; }
+    if (!EMAIL.test(d.email)) { setStatus("Add a valid email address so we can reply."); return; }
+    btn.disabled = true; btn.textContent = "Sending..."; setStatus("");
+    fetch("/api/advertise-inquiry", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (bodyJson) {
+        if (r.ok && bodyJson.ok) { done(d); return; }
+        throw new Error(bodyJson.error || "Something went wrong.");
+      });
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = "Send";
+      setStatus((err.message || "Something went wrong.") + " You can also email " + TO + " directly.");
+    });
   });
 })();
 </script>
